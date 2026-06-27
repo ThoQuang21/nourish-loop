@@ -9,38 +9,294 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ReceiverRouteImport } from './routes/receiver'
+import { Route as ProviderRouteImport } from './routes/provider'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ReceiverIndexRouteImport } from './routes/receiver.index'
+import { Route as ProviderIndexRouteImport } from './routes/provider.index'
+import { Route as ReceiverStoriesRouteImport } from './routes/receiver.stories'
+import { Route as ReceiverScanRouteImport } from './routes/receiver.scan'
+import { Route as ReceiverRequestsRouteImport } from './routes/receiver.requests'
+import { Route as ReceiverHistoryRouteImport } from './routes/receiver.history'
+import { Route as ProviderRequestsRouteImport } from './routes/provider.requests'
+import { Route as ProviderPostsRouteImport } from './routes/provider.posts'
+import { Route as ProviderEsgRouteImport } from './routes/provider.esg'
+import { Route as ProviderCreateRouteImport } from './routes/provider.create'
+import { Route as AuthRegisterRouteImport } from './routes/auth.register'
+import { Route as AuthLoginRouteImport } from './routes/auth.login'
+import { Route as ReceiverFoodIdRouteImport } from './routes/receiver.food.$id'
 
+const ReceiverRoute = ReceiverRouteImport.update({
+  id: '/receiver',
+  path: '/receiver',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProviderRoute = ProviderRouteImport.update({
+  id: '/provider',
+  path: '/provider',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReceiverIndexRoute = ReceiverIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ReceiverRoute,
+} as any)
+const ProviderIndexRoute = ProviderIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ProviderRoute,
+} as any)
+const ReceiverStoriesRoute = ReceiverStoriesRouteImport.update({
+  id: '/stories',
+  path: '/stories',
+  getParentRoute: () => ReceiverRoute,
+} as any)
+const ReceiverScanRoute = ReceiverScanRouteImport.update({
+  id: '/scan',
+  path: '/scan',
+  getParentRoute: () => ReceiverRoute,
+} as any)
+const ReceiverRequestsRoute = ReceiverRequestsRouteImport.update({
+  id: '/requests',
+  path: '/requests',
+  getParentRoute: () => ReceiverRoute,
+} as any)
+const ReceiverHistoryRoute = ReceiverHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => ReceiverRoute,
+} as any)
+const ProviderRequestsRoute = ProviderRequestsRouteImport.update({
+  id: '/requests',
+  path: '/requests',
+  getParentRoute: () => ProviderRoute,
+} as any)
+const ProviderPostsRoute = ProviderPostsRouteImport.update({
+  id: '/posts',
+  path: '/posts',
+  getParentRoute: () => ProviderRoute,
+} as any)
+const ProviderEsgRoute = ProviderEsgRouteImport.update({
+  id: '/esg',
+  path: '/esg',
+  getParentRoute: () => ProviderRoute,
+} as any)
+const ProviderCreateRoute = ProviderCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => ProviderRoute,
+} as any)
+const AuthRegisterRoute = AuthRegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AuthRoute,
+} as any)
+const ReceiverFoodIdRoute = ReceiverFoodIdRouteImport.update({
+  id: '/food/$id',
+  path: '/food/$id',
+  getParentRoute: () => ReceiverRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteWithChildren
+  '/notifications': typeof NotificationsRoute
+  '/profile': typeof ProfileRoute
+  '/provider': typeof ProviderRouteWithChildren
+  '/receiver': typeof ReceiverRouteWithChildren
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/register': typeof AuthRegisterRoute
+  '/provider/create': typeof ProviderCreateRoute
+  '/provider/esg': typeof ProviderEsgRoute
+  '/provider/posts': typeof ProviderPostsRoute
+  '/provider/requests': typeof ProviderRequestsRoute
+  '/receiver/history': typeof ReceiverHistoryRoute
+  '/receiver/requests': typeof ReceiverRequestsRoute
+  '/receiver/scan': typeof ReceiverScanRoute
+  '/receiver/stories': typeof ReceiverStoriesRoute
+  '/provider/': typeof ProviderIndexRoute
+  '/receiver/': typeof ReceiverIndexRoute
+  '/receiver/food/$id': typeof ReceiverFoodIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteWithChildren
+  '/notifications': typeof NotificationsRoute
+  '/profile': typeof ProfileRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/register': typeof AuthRegisterRoute
+  '/provider/create': typeof ProviderCreateRoute
+  '/provider/esg': typeof ProviderEsgRoute
+  '/provider/posts': typeof ProviderPostsRoute
+  '/provider/requests': typeof ProviderRequestsRoute
+  '/receiver/history': typeof ReceiverHistoryRoute
+  '/receiver/requests': typeof ReceiverRequestsRoute
+  '/receiver/scan': typeof ReceiverScanRoute
+  '/receiver/stories': typeof ReceiverStoriesRoute
+  '/provider': typeof ProviderIndexRoute
+  '/receiver': typeof ReceiverIndexRoute
+  '/receiver/food/$id': typeof ReceiverFoodIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteWithChildren
+  '/notifications': typeof NotificationsRoute
+  '/profile': typeof ProfileRoute
+  '/provider': typeof ProviderRouteWithChildren
+  '/receiver': typeof ReceiverRouteWithChildren
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/register': typeof AuthRegisterRoute
+  '/provider/create': typeof ProviderCreateRoute
+  '/provider/esg': typeof ProviderEsgRoute
+  '/provider/posts': typeof ProviderPostsRoute
+  '/provider/requests': typeof ProviderRequestsRoute
+  '/receiver/history': typeof ReceiverHistoryRoute
+  '/receiver/requests': typeof ReceiverRequestsRoute
+  '/receiver/scan': typeof ReceiverScanRoute
+  '/receiver/stories': typeof ReceiverStoriesRoute
+  '/provider/': typeof ProviderIndexRoute
+  '/receiver/': typeof ReceiverIndexRoute
+  '/receiver/food/$id': typeof ReceiverFoodIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/notifications'
+    | '/profile'
+    | '/provider'
+    | '/receiver'
+    | '/auth/login'
+    | '/auth/register'
+    | '/provider/create'
+    | '/provider/esg'
+    | '/provider/posts'
+    | '/provider/requests'
+    | '/receiver/history'
+    | '/receiver/requests'
+    | '/receiver/scan'
+    | '/receiver/stories'
+    | '/provider/'
+    | '/receiver/'
+    | '/receiver/food/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/notifications'
+    | '/profile'
+    | '/auth/login'
+    | '/auth/register'
+    | '/provider/create'
+    | '/provider/esg'
+    | '/provider/posts'
+    | '/provider/requests'
+    | '/receiver/history'
+    | '/receiver/requests'
+    | '/receiver/scan'
+    | '/receiver/stories'
+    | '/provider'
+    | '/receiver'
+    | '/receiver/food/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/notifications'
+    | '/profile'
+    | '/provider'
+    | '/receiver'
+    | '/auth/login'
+    | '/auth/register'
+    | '/provider/create'
+    | '/provider/esg'
+    | '/provider/posts'
+    | '/provider/requests'
+    | '/receiver/history'
+    | '/receiver/requests'
+    | '/receiver/scan'
+    | '/receiver/stories'
+    | '/provider/'
+    | '/receiver/'
+    | '/receiver/food/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRouteWithChildren
+  NotificationsRoute: typeof NotificationsRoute
+  ProfileRoute: typeof ProfileRoute
+  ProviderRoute: typeof ProviderRouteWithChildren
+  ReceiverRoute: typeof ReceiverRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/receiver': {
+      id: '/receiver'
+      path: '/receiver'
+      fullPath: '/receiver'
+      preLoaderRoute: typeof ReceiverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/provider': {
+      id: '/provider'
+      path: '/provider'
+      fullPath: '/provider'
+      preLoaderRoute: typeof ProviderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +304,162 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/receiver/': {
+      id: '/receiver/'
+      path: '/'
+      fullPath: '/receiver/'
+      preLoaderRoute: typeof ReceiverIndexRouteImport
+      parentRoute: typeof ReceiverRoute
+    }
+    '/provider/': {
+      id: '/provider/'
+      path: '/'
+      fullPath: '/provider/'
+      preLoaderRoute: typeof ProviderIndexRouteImport
+      parentRoute: typeof ProviderRoute
+    }
+    '/receiver/stories': {
+      id: '/receiver/stories'
+      path: '/stories'
+      fullPath: '/receiver/stories'
+      preLoaderRoute: typeof ReceiverStoriesRouteImport
+      parentRoute: typeof ReceiverRoute
+    }
+    '/receiver/scan': {
+      id: '/receiver/scan'
+      path: '/scan'
+      fullPath: '/receiver/scan'
+      preLoaderRoute: typeof ReceiverScanRouteImport
+      parentRoute: typeof ReceiverRoute
+    }
+    '/receiver/requests': {
+      id: '/receiver/requests'
+      path: '/requests'
+      fullPath: '/receiver/requests'
+      preLoaderRoute: typeof ReceiverRequestsRouteImport
+      parentRoute: typeof ReceiverRoute
+    }
+    '/receiver/history': {
+      id: '/receiver/history'
+      path: '/history'
+      fullPath: '/receiver/history'
+      preLoaderRoute: typeof ReceiverHistoryRouteImport
+      parentRoute: typeof ReceiverRoute
+    }
+    '/provider/requests': {
+      id: '/provider/requests'
+      path: '/requests'
+      fullPath: '/provider/requests'
+      preLoaderRoute: typeof ProviderRequestsRouteImport
+      parentRoute: typeof ProviderRoute
+    }
+    '/provider/posts': {
+      id: '/provider/posts'
+      path: '/posts'
+      fullPath: '/provider/posts'
+      preLoaderRoute: typeof ProviderPostsRouteImport
+      parentRoute: typeof ProviderRoute
+    }
+    '/provider/esg': {
+      id: '/provider/esg'
+      path: '/esg'
+      fullPath: '/provider/esg'
+      preLoaderRoute: typeof ProviderEsgRouteImport
+      parentRoute: typeof ProviderRoute
+    }
+    '/provider/create': {
+      id: '/provider/create'
+      path: '/create'
+      fullPath: '/provider/create'
+      preLoaderRoute: typeof ProviderCreateRouteImport
+      parentRoute: typeof ProviderRoute
+    }
+    '/auth/register': {
+      id: '/auth/register'
+      path: '/register'
+      fullPath: '/auth/register'
+      preLoaderRoute: typeof AuthRegisterRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/receiver/food/$id': {
+      id: '/receiver/food/$id'
+      path: '/food/$id'
+      fullPath: '/receiver/food/$id'
+      preLoaderRoute: typeof ReceiverFoodIdRouteImport
+      parentRoute: typeof ReceiverRoute
+    }
   }
 }
 
+interface AuthRouteChildren {
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthRegisterRoute: typeof AuthRegisterRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthLoginRoute: AuthLoginRoute,
+  AuthRegisterRoute: AuthRegisterRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
+interface ProviderRouteChildren {
+  ProviderCreateRoute: typeof ProviderCreateRoute
+  ProviderEsgRoute: typeof ProviderEsgRoute
+  ProviderPostsRoute: typeof ProviderPostsRoute
+  ProviderRequestsRoute: typeof ProviderRequestsRoute
+  ProviderIndexRoute: typeof ProviderIndexRoute
+}
+
+const ProviderRouteChildren: ProviderRouteChildren = {
+  ProviderCreateRoute: ProviderCreateRoute,
+  ProviderEsgRoute: ProviderEsgRoute,
+  ProviderPostsRoute: ProviderPostsRoute,
+  ProviderRequestsRoute: ProviderRequestsRoute,
+  ProviderIndexRoute: ProviderIndexRoute,
+}
+
+const ProviderRouteWithChildren = ProviderRoute._addFileChildren(
+  ProviderRouteChildren,
+)
+
+interface ReceiverRouteChildren {
+  ReceiverHistoryRoute: typeof ReceiverHistoryRoute
+  ReceiverRequestsRoute: typeof ReceiverRequestsRoute
+  ReceiverScanRoute: typeof ReceiverScanRoute
+  ReceiverStoriesRoute: typeof ReceiverStoriesRoute
+  ReceiverIndexRoute: typeof ReceiverIndexRoute
+  ReceiverFoodIdRoute: typeof ReceiverFoodIdRoute
+}
+
+const ReceiverRouteChildren: ReceiverRouteChildren = {
+  ReceiverHistoryRoute: ReceiverHistoryRoute,
+  ReceiverRequestsRoute: ReceiverRequestsRoute,
+  ReceiverScanRoute: ReceiverScanRoute,
+  ReceiverStoriesRoute: ReceiverStoriesRoute,
+  ReceiverIndexRoute: ReceiverIndexRoute,
+  ReceiverFoodIdRoute: ReceiverFoodIdRoute,
+}
+
+const ReceiverRouteWithChildren = ReceiverRoute._addFileChildren(
+  ReceiverRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRouteWithChildren,
+  NotificationsRoute: NotificationsRoute,
+  ProfileRoute: ProfileRoute,
+  ProviderRoute: ProviderRouteWithChildren,
+  ReceiverRoute: ReceiverRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
