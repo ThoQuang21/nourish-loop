@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Filter, Search, ShieldCheck, SlidersHorizontal } from "lucide-react";
 import { FoodCard } from "@/components/FoodCard";
 import { MapMock } from "@/components/MapMock";
-import { foodPosts, getProvider } from "@/lib/mock-data";
+import { listPosts, type PublicPostDTO } from "@/lib/api";
 
 export const Route = createFileRoute("/receiver/")({
   component: ReceiverMap,
@@ -14,21 +14,36 @@ function ReceiverMap() {
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [maxDist, setMaxDist] = useState(10);
+  const [posts, setPosts] = useState<PublicPostDTO[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    listPosts({ status: "OPEN" })
+      .then(setPosts)
+      .catch((e) => setError(e instanceof Error ? e.message : "Không tải được danh sách"))
+      .finally(() => setLoading(false));
+  }, []);
+
+  // Backend chưa trả khoảng cách → tạm tính tượng trưng theo thứ tự để demo bộ lọc.
   const enriched = useMemo(
-    () =>
-      foodPosts
-        .filter((p) => p.status === "open" || p.status === "matched")
-        .map((p, i) => ({ ...p, distanceKm: 0.8 + i * 0.9 })),
-    []
+    () => posts.map((p, i) => ({ ...p, distanceKm: 0.8 + i * 0.9 })),
+    [posts],
   );
 
   const list = enriched.filter((p) => {
     if (search && !p.title.toLowerCase().includes(search.toLowerCase())) return false;
-    if (verifiedOnly && getProvider(p.providerId).level !== "verified") return false;
+    if (verifiedOnly && p.provider.level !== "verified") return false;
     if (p.distanceKm > maxDist) return false;
     return true;
   });
+
+  // MapMock cần toạ độ x,y (backend chưa có) → gán tượng trưng để vẫn hiển thị pin.
+  const mapPosts = list.map((p, i) => ({
+    ...p,
+    x: 15 + ((i * 29) % 70),
+    y: 18 + ((i * 43) % 62),
+  })) as unknown as Parameters<typeof MapMock>[0]["posts"];
 
   return (
     <div className="flex flex-col h-[calc(100vh-0px)] md:h-screen overflow-hidden">
@@ -69,7 +84,7 @@ function ReceiverMap() {
         {/* Map */}
         <div className="p-4 md:p-6 min-h-[300px] lg:min-h-0">
           <MapMock
-            posts={list}
+            posts={mapPosts}
             activeId={activeId}
             onSelect={(id) => setActiveId(id)}
             height="100%"
@@ -85,7 +100,11 @@ function ReceiverMap() {
             </div>
           </div>
           <div className="p-5 space-y-4">
-            {list.length === 0 ? (
+            {loading ? (
+              <div className="text-center py-16 text-muted-foreground text-sm">Đang tải...</div>
+            ) : error ? (
+              <div className="text-center py-16 text-destructive text-sm">{error}</div>
+            ) : list.length === 0 ? (
               <div className="text-center py-16 text-muted-foreground text-sm">
                 Không tìm thấy bài đăng phù hợp.
               </div>
@@ -96,7 +115,7 @@ function ReceiverMap() {
                   onMouseEnter={() => setActiveId(p.id)}
                   className={activeId === p.id ? "ring-2 ring-primary rounded-2xl" : ""}
                 >
-                  <FoodCard post={p} distanceKm={p.distanceKm} />
+                  <FoodCard post={p} provider={p.provider} distanceKm={p.distanceKm} />
                 </div>
               ))
             )}

@@ -303,6 +303,33 @@ export async function uploadPostImage(file: File): Promise<{ imageUrl: string }>
   return data;
 }
 
+// ===================== PUBLIC: BROWSE TIN (cho receiver) =====================
+export interface ProviderBrief {
+  id: string;
+  name: string;
+  org: string;
+  level: "verified" | "community";
+  trustScore: number;
+  totalKg: number;
+  totalDeals: number;
+  avatar: string;
+  address: string;
+}
+
+export interface PublicPostDTO extends FoodPostDTO {
+  provider: ProviderBrief;
+}
+
+export function listPosts(
+  query: { search?: string; category?: string; status?: string; minKg?: number } = {},
+): Promise<PublicPostDTO[]> {
+  return request<PublicPostDTO[]>(`/posts${qs(query)}`);
+}
+
+export function getPublicPost(id: string): Promise<PublicPostDTO> {
+  return request<PublicPostDTO>(`/posts/${id}`);
+}
+
 // ===================== RECEIVER: REQUESTS =====================
 // Lưu ý: endpoint receiver trả RAW Prisma shape (status HOA, category enum, imageUrl).
 export interface ReceiverRequestDTO {
