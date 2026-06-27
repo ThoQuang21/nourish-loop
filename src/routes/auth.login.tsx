@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import { login, setSession } from "@/lib/api";
 
 export const Route = createFileRoute("/auth/login")({
   component: Login,
@@ -7,7 +8,32 @@ export const Route = createFileRoute("/auth/login")({
 
 function Login() {
   const nav = useNavigate();
-  const [role] = useState<"provider" | "receiver">("provider");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      const { user, sessionToken } = await login(email, password);
+      setSession({ user, sessionToken });
+      // Điều hướng theo vai trò thật từ backend.
+      if (user.role === "ADMIN") {
+        nav({ to: "/admin" });
+      } else if (user.role === "PROVIDER") {
+        nav({ to: "/provider" });
+      } else {
+        nav({ to: "/receiver" });
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Đăng nhập thất bại");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -16,24 +42,16 @@ function Login() {
         <p className="text-muted-foreground mt-1 text-sm">Chào mừng trở lại với Food Life 🌱</p>
       </div>
 
-      <form
-        className="space-y-4"
-        onSubmit={(e) => {
-          e.preventDefault();
-          const email = (e.currentTarget.elements.namedItem("email") as HTMLInputElement).value;
-          if (email.includes("admin")) {
-            nav({ to: "/admin" });
-          } else {
-            nav({ to: role === "provider" ? "/provider" : "/receiver" });
-          }
-        }}
-      >
+      <form className="space-y-4" onSubmit={onSubmit}>
         <div className="space-y-1.5">
           <label className="text-sm font-semibold">Email</label>
           <input
             name="email"
             type="email"
-            defaultValue="minhanh@lotussaigon.vn"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="ban@example.com"
             className="w-full h-11 px-4 rounded-xl border border-input bg-card focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
           />
         </div>
@@ -41,7 +59,10 @@ function Login() {
           <label className="text-sm font-semibold">Mật khẩu</label>
           <input
             type="password"
-            defaultValue="••••••••"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Mật khẩu"
             className="w-full h-11 px-4 rounded-xl border border-input bg-card focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
           />
         </div>
@@ -55,11 +76,14 @@ function Login() {
           </a>
         </div>
 
+        {error && <p className="text-sm text-destructive">{error}</p>}
+
         <button
           type="submit"
-          className="w-full h-11 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90"
+          disabled={loading}
+          className="w-full h-11 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 disabled:opacity-60"
         >
-          Đăng nhập
+          {loading ? "Đang đăng nhập..." : "Đăng nhập"}
         </button>
 
         <div className="relative text-center">
@@ -102,7 +126,7 @@ function Login() {
         </Link>
       </p>
       <p className="text-center text-xs text-muted-foreground">
-        Quản trị viên? Dùng email chứa &quot;admin&quot; hoặc{" "}
+        Quản trị viên? Đăng nhập bằng tài khoản có vai trò ADMIN hoặc{" "}
         <Link to="/admin" className="text-primary font-semibold hover:underline">
           vào bảng điều khiển
         </Link>

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Eye, MoreHorizontal, Pencil, Scale, X } from "lucide-react";
-import { foodPosts } from "@/lib/mock-data";
+import { deletePost, listMyPosts, type FoodPostDTO } from "@/lib/api";
 
 export const Route = createFileRoute("/provider/posts")({
   component: MyPosts,
@@ -16,8 +16,36 @@ const STATUS: Record<string, { label: string; cls: string }> = {
 
 function MyPosts() {
   const [filter, setFilter] = useState<string>("all");
-  const all = foodPosts; // for demo show all
-  const list = filter === "all" ? all : all.filter((p) => p.status === filter);
+  const [posts, setPosts] = useState<FoodPostDTO[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  async function load() {
+    setLoading(true);
+    setError(null);
+    try {
+      setPosts(await listMyPosts());
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Không tải được bài đăng");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    void load();
+  }, []);
+
+  async function onDelete(id: string) {
+    try {
+      await deletePost(id);
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Không xoá được bài đăng");
+    }
+  }
+
+  const list = filter === "all" ? posts : posts.filter((p) => p.status === filter);
 
   return (
     <div className="p-6 lg:p-10 max-w-6xl mx-auto">
@@ -53,12 +81,16 @@ function MyPosts() {
         ))}
       </div>
 
-      {list.length === 0 ? (
+      {error && <p className="text-sm text-destructive mb-4">{error}</p>}
+
+      {loading ? (
+        <div className="text-sm text-muted-foreground p-10 text-center">Đang tải...</div>
+      ) : list.length === 0 ? (
         <EmptyState />
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {list.map((p) => {
-            const s = STATUS[p.status];
+            const s = STATUS[p.status] ?? STATUS.open;
             return (
               <div key={p.id} className="bg-card border border-border rounded-2xl overflow-hidden shadow-card">
                 <div className="relative aspect-[16/10]">
@@ -86,7 +118,11 @@ function MyPosts() {
                     <button className="flex-1 inline-flex items-center justify-center gap-1 text-xs font-semibold py-2 rounded-lg bg-secondary hover:bg-secondary/80">
                       <Pencil className="size-3.5" /> Sửa
                     </button>
-                    <button className="inline-flex items-center justify-center p-2 rounded-lg bg-secondary hover:bg-destructive/15 hover:text-destructive">
+                    <button
+                      onClick={() => onDelete(p.id)}
+                      title="Đóng / hết hạn bài đăng"
+                      className="inline-flex items-center justify-center p-2 rounded-lg bg-secondary hover:bg-destructive/15 hover:text-destructive"
+                    >
                       <X className="size-3.5" />
                     </button>
                   </div>
