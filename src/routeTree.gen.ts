@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ReceiverRouteImport } from './routes/receiver'
 import { Route as ProviderRouteImport } from './routes/provider'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ReceiverIndexRouteImport } from './routes/receiver.index'
@@ -41,6 +42,11 @@ const ProviderRoute = ProviderRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -122,6 +128,7 @@ const ReceiverFoodIdRoute = ReceiverFoodIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
+  '/notifications': typeof NotificationsRoute
   '/profile': typeof ProfileRoute
   '/provider': typeof ProviderRouteWithChildren
   '/receiver': typeof ReceiverRouteWithChildren
@@ -142,6 +149,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
+  '/notifications': typeof NotificationsRoute
   '/profile': typeof ProfileRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
@@ -161,6 +169,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
+  '/notifications': typeof NotificationsRoute
   '/profile': typeof ProfileRoute
   '/provider': typeof ProviderRouteWithChildren
   '/receiver': typeof ReceiverRouteWithChildren
@@ -183,6 +192,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/notifications'
     | '/profile'
     | '/provider'
     | '/receiver'
@@ -203,6 +213,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/notifications'
     | '/profile'
     | '/auth/login'
     | '/auth/register'
@@ -221,6 +232,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/auth'
+    | '/notifications'
     | '/profile'
     | '/provider'
     | '/receiver'
@@ -242,6 +254,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRouteWithChildren
+  NotificationsRoute: typeof NotificationsRoute
   ProfileRoute: typeof ProfileRoute
   ProviderRoute: typeof ProviderRouteWithChildren
   ReceiverRoute: typeof ReceiverRouteWithChildren
@@ -268,6 +281,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -435,6 +455,7 @@ const ReceiverRouteWithChildren = ReceiverRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
+  NotificationsRoute: NotificationsRoute,
   ProfileRoute: ProfileRoute,
   ProviderRoute: ProviderRouteWithChildren,
   ReceiverRoute: ReceiverRouteWithChildren,
