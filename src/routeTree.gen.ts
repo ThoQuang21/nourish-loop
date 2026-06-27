@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProviderIndexRouteImport } from './routes/provider.index'
 import { Route as ProviderRequestsRouteImport } from './routes/provider.requests'
 import { Route as ProviderPostsRouteImport } from './routes/provider.posts'
+import { Route as ProviderEsgRouteImport } from './routes/provider.esg'
 import { Route as ProviderCreateRouteImport } from './routes/provider.create'
 import { Route as AuthRegisterRouteImport } from './routes/auth.register'
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
@@ -49,6 +50,11 @@ const ProviderPostsRoute = ProviderPostsRouteImport.update({
   path: '/posts',
   getParentRoute: () => ProviderRoute,
 } as any)
+const ProviderEsgRoute = ProviderEsgRouteImport.update({
+  id: '/esg',
+  path: '/esg',
+  getParentRoute: () => ProviderRoute,
+} as any)
 const ProviderCreateRoute = ProviderCreateRouteImport.update({
   id: '/create',
   path: '/create',
@@ -72,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/provider/create': typeof ProviderCreateRoute
+  '/provider/esg': typeof ProviderEsgRoute
   '/provider/posts': typeof ProviderPostsRoute
   '/provider/requests': typeof ProviderRequestsRoute
   '/provider/': typeof ProviderIndexRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/provider/create': typeof ProviderCreateRoute
+  '/provider/esg': typeof ProviderEsgRoute
   '/provider/posts': typeof ProviderPostsRoute
   '/provider/requests': typeof ProviderRequestsRoute
   '/provider': typeof ProviderIndexRoute
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/provider/create': typeof ProviderCreateRoute
+  '/provider/esg': typeof ProviderEsgRoute
   '/provider/posts': typeof ProviderPostsRoute
   '/provider/requests': typeof ProviderRequestsRoute
   '/provider/': typeof ProviderIndexRoute
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/register'
     | '/provider/create'
+    | '/provider/esg'
     | '/provider/posts'
     | '/provider/requests'
     | '/provider/'
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/register'
     | '/provider/create'
+    | '/provider/esg'
     | '/provider/posts'
     | '/provider/requests'
     | '/provider'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/auth/login'
     | '/auth/register'
     | '/provider/create'
+    | '/provider/esg'
     | '/provider/posts'
     | '/provider/requests'
     | '/provider/'
@@ -183,6 +195,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProviderPostsRouteImport
       parentRoute: typeof ProviderRoute
     }
+    '/provider/esg': {
+      id: '/provider/esg'
+      path: '/esg'
+      fullPath: '/provider/esg'
+      preLoaderRoute: typeof ProviderEsgRouteImport
+      parentRoute: typeof ProviderRoute
+    }
     '/provider/create': {
       id: '/provider/create'
       path: '/create'
@@ -221,6 +240,7 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 interface ProviderRouteChildren {
   ProviderCreateRoute: typeof ProviderCreateRoute
+  ProviderEsgRoute: typeof ProviderEsgRoute
   ProviderPostsRoute: typeof ProviderPostsRoute
   ProviderRequestsRoute: typeof ProviderRequestsRoute
   ProviderIndexRoute: typeof ProviderIndexRoute
@@ -228,6 +248,7 @@ interface ProviderRouteChildren {
 
 const ProviderRouteChildren: ProviderRouteChildren = {
   ProviderCreateRoute: ProviderCreateRoute,
+  ProviderEsgRoute: ProviderEsgRoute,
   ProviderPostsRoute: ProviderPostsRoute,
   ProviderRequestsRoute: ProviderRequestsRoute,
   ProviderIndexRoute: ProviderIndexRoute,
