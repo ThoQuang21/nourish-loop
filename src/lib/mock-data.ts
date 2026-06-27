@@ -43,6 +43,32 @@ export interface Request {
   createdAt: string;
 }
 
+export interface Receiver {
+  id: string;
+  name: string;
+  org: string;
+  verified: boolean;
+  trustScore: number;
+  totalReceivedKg: number;
+  totalDeals: number;
+  avatar: string;
+  address: string;
+  type: "ngo" | "shelter" | "community";
+}
+
+export interface VerificationRequest {
+  id: string;
+  orgName: string;
+  contactName: string;
+  email: string;
+  role: "provider" | "receiver";
+  type: string;
+  address: string;
+  documents: string;
+  submittedAt: string;
+  status: "pending" | "approved" | "rejected";
+}
+
 export interface Story {
   id: string;
   author: string;
@@ -53,6 +79,7 @@ export interface Story {
   thanksTo: string;
   daysAgo: number;
   likes: number;
+  status: "published" | "pending" | "hidden";
 }
 
 export interface AppNotification {
@@ -64,8 +91,7 @@ export interface AppNotification {
   unread: boolean;
 }
 
-const img = (seed: string) =>
-  `https://images.unsplash.com/${seed}?auto=format&fit=crop&w=800&q=70`;
+const img = (seed: string) => `https://images.unsplash.com/${seed}?auto=format&fit=crop&w=800&q=70`;
 
 export const providers: Provider[] = [
   {
@@ -122,6 +148,120 @@ export const providers: Provider[] = [
     totalDeals: 112,
     avatar: "https://i.pravatar.cc/120?img=9",
     address: "27 Pasteur, Quận 1, TP.HCM",
+  },
+];
+
+export const receivers: Receiver[] = [
+  {
+    id: "rc1",
+    name: "Chị Hương",
+    org: "Bếp ăn Tình Thương",
+    verified: true,
+    trustScore: 4.9,
+    totalReceivedKg: 1240,
+    totalDeals: 86,
+    avatar: "https://i.pravatar.cc/120?img=32",
+    address: "Quận 1, TP.HCM",
+    type: "ngo",
+  },
+  {
+    id: "rc2",
+    name: "Anh Tuấn",
+    org: "Trại cứu hộ Sài Gòn Time",
+    verified: true,
+    trustScore: 4.7,
+    totalReceivedKg: 680,
+    totalDeals: 52,
+    avatar: "https://i.pravatar.cc/120?img=24",
+    address: "Quận 7, TP.HCM",
+    type: "shelter",
+  },
+  {
+    id: "rc3",
+    name: "Cô Lan",
+    org: "Mái ấm Hoa Hồng Nhỏ",
+    verified: true,
+    trustScore: 4.8,
+    totalReceivedKg: 920,
+    totalDeals: 64,
+    avatar: "https://i.pravatar.cc/120?img=44",
+    address: "Quận 3, TP.HCM",
+    type: "shelter",
+  },
+  {
+    id: "rc4",
+    name: "Nguyễn Văn Đạt",
+    org: "Bếp cộng đồng Phú Nhuận",
+    verified: false,
+    trustScore: 4.1,
+    totalReceivedKg: 45,
+    totalDeals: 6,
+    avatar: "https://i.pravatar.cc/120?img=18",
+    address: "Phú Nhuận, TP.HCM",
+    type: "community",
+  },
+  {
+    id: "rc5",
+    name: "Trần Thị Mai",
+    org: "Trung tâm Nuôi dưỡng Trẻ em",
+    verified: false,
+    trustScore: 3.9,
+    totalReceivedKg: 0,
+    totalDeals: 0,
+    avatar: "https://i.pravatar.cc/120?img=25",
+    address: "Bình Thạnh, TP.HCM",
+    type: "ngo",
+  },
+];
+
+export const verificationRequests: VerificationRequest[] = [
+  {
+    id: "v1",
+    orgName: "Bakery Sài Gòn Mới",
+    contactName: "Hoàng Minh",
+    email: "minh@bakery-sg.vn",
+    role: "provider",
+    type: "Tiệm bánh",
+    address: "Quận 10, TP.HCM",
+    documents: "Giấy phép kinh doanh, ảnh cơ sở",
+    submittedAt: "2 giờ trước",
+    status: "pending",
+  },
+  {
+    id: "v2",
+    orgName: "Mái ấm Bình An",
+    contactName: "Phạm Thu Hà",
+    email: "ha@maiambinhan.org",
+    role: "receiver",
+    type: "Mái ấm / Trung tâm nuôi dưỡng",
+    address: "Gò Vấp, TP.HCM",
+    documents: "Giấy đăng ký tổ chức, CMND người đại diện",
+    submittedAt: "5 giờ trước",
+    status: "pending",
+  },
+  {
+    id: "v3",
+    orgName: "Nhà hàng Sen Vàng",
+    contactName: "Lê Quang",
+    email: "quang@senvang.vn",
+    role: "provider",
+    type: "Nhà hàng",
+    address: "Quận 2, TP.HCM",
+    documents: "Giấy phép kinh doanh",
+    submittedAt: "1 ngày trước",
+    status: "pending",
+  },
+  {
+    id: "v4",
+    orgName: "Trung tâm Nuôi dưỡng Trẻ em",
+    contactName: "Trần Thị Mai",
+    email: "mai@trungtamnuoiduong.vn",
+    role: "receiver",
+    type: "Tổ chức xã hội",
+    address: "Bình Thạnh, TP.HCM",
+    documents: "Giấy phép hoạt động, báo cáo hoạt động",
+    submittedAt: "2 ngày trước",
+    status: "pending",
   },
 ];
 
@@ -302,11 +442,11 @@ export const stories: Story[] = [
     org: "Bếp ăn Tình Thương",
     avatar: "https://i.pravatar.cc/120?img=32",
     image: img("photo-1488521787991-ed7bbaae773c"),
-    text:
-      "Hôm nay chúng tôi nhận được 28kg suất ăn từ Khách sạn Lotus Saigon. 60 phần cơm đã được trao tận tay các em nhỏ tại mái ấm. Cảm ơn Food Life đã kết nối!",
+    text: "Hôm nay chúng tôi nhận được 28kg suất ăn từ Khách sạn Lotus Saigon. 60 phần cơm đã được trao tận tay các em nhỏ tại mái ấm. Cảm ơn Food Life đã kết nối!",
     thanksTo: "Khách sạn Lotus Saigon",
     daysAgo: 1,
     likes: 142,
+    status: "published",
   },
   {
     id: "s2",
@@ -314,11 +454,11 @@ export const stories: Story[] = [
     org: "Trại cứu hộ Sài Gòn Time",
     avatar: "https://i.pravatar.cc/120?img=24",
     image: img("photo-1601758228041-f3b2795255f1"),
-    text:
-      "45kg rau củ tươi đã trở thành bữa ăn cho hơn 80 bé chó mèo được cứu hộ. Một ngày tử tế bắt đầu từ những điều nhỏ.",
+    text: "45kg rau củ tươi đã trở thành bữa ăn cho hơn 80 bé chó mèo được cứu hộ. Một ngày tử tế bắt đầu từ những điều nhỏ.",
     thanksTo: "Siêu thị Xanh Mart",
     daysAgo: 3,
     likes: 287,
+    status: "published",
   },
   {
     id: "s3",
@@ -326,11 +466,23 @@ export const stories: Story[] = [
     org: "Mái ấm Hoa Hồng Nhỏ",
     avatar: "https://i.pravatar.cc/120?img=44",
     image: img("photo-1593113598332-cd288d649433"),
-    text:
-      "Cảm ơn tiệm bánh Hương Việt mỗi tối đều chia sẻ bánh mì cho các em. Niềm vui rất đơn giản ❤️",
+    text: "Cảm ơn tiệm bánh Hương Việt mỗi tối đều chia sẻ bánh mì cho các em. Niềm vui rất đơn giản ❤️",
     thanksTo: "Bakery Hương Việt",
     daysAgo: 5,
     likes: 96,
+    status: "published",
+  },
+  {
+    id: "s4",
+    author: "Anh Đạt",
+    org: "Bếp cộng đồng Phú Nhuận",
+    avatar: "https://i.pravatar.cc/120?img=18",
+    image: img("photo-1498837167922-ddd27525d352"),
+    text: "Hôm nay nhận được 15kg thực phẩm từ siêu thị. Cảm ơn Food Life!",
+    thanksTo: "Siêu thị Xanh Mart",
+    daysAgo: 0,
+    likes: 0,
+    status: "pending",
   },
 ];
 

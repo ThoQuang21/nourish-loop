@@ -10,14 +10,20 @@ interface NavItem {
 }
 
 interface AppShellProps {
-  role: "provider" | "receiver";
+  role: "provider" | "receiver" | "admin";
   nav: NavItem[];
   children: ReactNode;
 }
 
+const ROLE_LABELS: Record<AppShellProps["role"], string> = {
+  provider: "Nhà cung cấp",
+  receiver: "Người nhận",
+  admin: "Quản trị viên",
+};
+
 export function AppShell({ role, nav, children }: AppShellProps) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const roleLabel = role === "provider" ? "Nhà cung cấp" : "Người nhận";
+  const roleLabel = ROLE_LABELS[role];
 
   return (
     <div className="min-h-screen flex bg-background">
@@ -34,7 +40,8 @@ export function AppShell({ role, nav, children }: AppShellProps) {
         </Link>
         <nav className="flex-1 p-3 space-y-1">
           {nav.map((item) => {
-            const active = pathname === item.to || (item.to !== `/${role}` && pathname.startsWith(item.to));
+            const active =
+              pathname === item.to || (item.to !== `/${role}` && pathname.startsWith(item.to));
             return (
               <Link
                 key={item.to}
@@ -43,7 +50,7 @@ export function AppShell({ role, nav, children }: AppShellProps) {
                   "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors",
                   active
                     ? "bg-primary-soft/40 text-primary"
-                    : "text-foreground/70 hover:bg-secondary hover:text-foreground"
+                    : "text-foreground/70 hover:bg-secondary hover:text-foreground",
                 )}
               >
                 <span className={cn("size-5", active && "text-primary")}>{item.icon}</span>
@@ -54,17 +61,25 @@ export function AppShell({ role, nav, children }: AppShellProps) {
         </nav>
         <div className="p-4 border-t border-border">
           <Link
-            to="/profile"
+            to={role === "admin" ? "/admin" : "/profile"}
             className="flex items-center gap-3 p-2 rounded-xl hover:bg-secondary transition-colors"
           >
             <img
-              src="https://i.pravatar.cc/80?img=11"
+              src={
+                role === "admin"
+                  ? "https://i.pravatar.cc/80?img=68"
+                  : "https://i.pravatar.cc/80?img=11"
+              }
               alt=""
               className="size-9 rounded-full object-cover"
             />
             <div className="text-sm">
-              <div className="font-semibold leading-tight">Minh Anh</div>
-              <div className="text-xs text-muted-foreground">Xem hồ sơ</div>
+              <div className="font-semibold leading-tight">
+                {role === "admin" ? "Admin Food Life" : "Minh Anh"}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {role === "admin" ? "Bảng điều khiển" : "Xem hồ sơ"}
+              </div>
             </div>
           </Link>
         </div>
@@ -90,14 +105,15 @@ export function AppShell({ role, nav, children }: AppShellProps) {
         <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card border-t border-border z-40">
           <div className="grid grid-cols-5">
             {nav.slice(0, 5).map((item) => {
-              const active = pathname === item.to || (item.to !== `/${role}` && pathname.startsWith(item.to));
+              const active =
+                pathname === item.to || (item.to !== `/${role}` && pathname.startsWith(item.to));
               return (
                 <Link
                   key={item.to}
                   to={item.to}
                   className={cn(
                     "flex flex-col items-center justify-center py-2 gap-0.5 text-[10px]",
-                    active ? "text-primary" : "text-muted-foreground"
+                    active ? "text-primary" : "text-muted-foreground",
                   )}
                 >
                   <span className="size-5">{item.icon}</span>
