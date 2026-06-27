@@ -21,6 +21,7 @@ import { Route as ProviderEsgRouteImport } from './routes/provider.esg'
 import { Route as ProviderCreateRouteImport } from './routes/provider.create'
 import { Route as AuthRegisterRouteImport } from './routes/auth.register'
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
+import { Route as ReceiverFoodIdRouteImport } from './routes/receiver.food.$id'
 
 const ReceiverRoute = ReceiverRouteImport.update({
   id: '/receiver',
@@ -82,6 +83,11 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => AuthRoute,
 } as any)
+const ReceiverFoodIdRoute = ReceiverFoodIdRouteImport.update({
+  id: '/food/$id',
+  path: '/food/$id',
+  getParentRoute: () => ReceiverRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/provider/requests': typeof ProviderRequestsRoute
   '/provider/': typeof ProviderIndexRoute
   '/receiver/': typeof ReceiverIndexRoute
+  '/receiver/food/$id': typeof ReceiverFoodIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -108,6 +115,7 @@ export interface FileRoutesByTo {
   '/provider/requests': typeof ProviderRequestsRoute
   '/provider': typeof ProviderIndexRoute
   '/receiver': typeof ReceiverIndexRoute
+  '/receiver/food/$id': typeof ReceiverFoodIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -123,6 +131,7 @@ export interface FileRoutesById {
   '/provider/requests': typeof ProviderRequestsRoute
   '/provider/': typeof ProviderIndexRoute
   '/receiver/': typeof ReceiverIndexRoute
+  '/receiver/food/$id': typeof ReceiverFoodIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -139,6 +148,7 @@ export interface FileRouteTypes {
     | '/provider/requests'
     | '/provider/'
     | '/receiver/'
+    | '/receiver/food/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -151,6 +161,7 @@ export interface FileRouteTypes {
     | '/provider/requests'
     | '/provider'
     | '/receiver'
+    | '/receiver/food/$id'
   id:
     | '__root__'
     | '/'
@@ -165,6 +176,7 @@ export interface FileRouteTypes {
     | '/provider/requests'
     | '/provider/'
     | '/receiver/'
+    | '/receiver/food/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -260,6 +272,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/receiver/food/$id': {
+      id: '/receiver/food/$id'
+      path: '/food/$id'
+      fullPath: '/receiver/food/$id'
+      preLoaderRoute: typeof ReceiverFoodIdRouteImport
+      parentRoute: typeof ReceiverRoute
+    }
   }
 }
 
@@ -297,10 +316,12 @@ const ProviderRouteWithChildren = ProviderRoute._addFileChildren(
 
 interface ReceiverRouteChildren {
   ReceiverIndexRoute: typeof ReceiverIndexRoute
+  ReceiverFoodIdRoute: typeof ReceiverFoodIdRoute
 }
 
 const ReceiverRouteChildren: ReceiverRouteChildren = {
   ReceiverIndexRoute: ReceiverIndexRoute,
+  ReceiverFoodIdRoute: ReceiverFoodIdRoute,
 }
 
 const ReceiverRouteWithChildren = ReceiverRoute._addFileChildren(
