@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ReceiverIndexRouteImport } from './routes/receiver.index'
 import { Route as ProviderIndexRouteImport } from './routes/provider.index'
+import { Route as ReceiverScanRouteImport } from './routes/receiver.scan'
 import { Route as ReceiverRequestsRouteImport } from './routes/receiver.requests'
 import { Route as ProviderRequestsRouteImport } from './routes/provider.requests'
 import { Route as ProviderPostsRouteImport } from './routes/provider.posts'
@@ -53,6 +54,11 @@ const ProviderIndexRoute = ProviderIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => ProviderRoute,
+} as any)
+const ReceiverScanRoute = ReceiverScanRouteImport.update({
+  id: '/scan',
+  path: '/scan',
+  getParentRoute: () => ReceiverRoute,
 } as any)
 const ReceiverRequestsRoute = ReceiverRequestsRouteImport.update({
   id: '/requests',
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/provider/posts': typeof ProviderPostsRoute
   '/provider/requests': typeof ProviderRequestsRoute
   '/receiver/requests': typeof ReceiverRequestsRoute
+  '/receiver/scan': typeof ReceiverScanRoute
   '/provider/': typeof ProviderIndexRoute
   '/receiver/': typeof ReceiverIndexRoute
   '/receiver/food/$id': typeof ReceiverFoodIdRoute
@@ -121,6 +128,7 @@ export interface FileRoutesByTo {
   '/provider/posts': typeof ProviderPostsRoute
   '/provider/requests': typeof ProviderRequestsRoute
   '/receiver/requests': typeof ReceiverRequestsRoute
+  '/receiver/scan': typeof ReceiverScanRoute
   '/provider': typeof ProviderIndexRoute
   '/receiver': typeof ReceiverIndexRoute
   '/receiver/food/$id': typeof ReceiverFoodIdRoute
@@ -138,6 +146,7 @@ export interface FileRoutesById {
   '/provider/posts': typeof ProviderPostsRoute
   '/provider/requests': typeof ProviderRequestsRoute
   '/receiver/requests': typeof ReceiverRequestsRoute
+  '/receiver/scan': typeof ReceiverScanRoute
   '/provider/': typeof ProviderIndexRoute
   '/receiver/': typeof ReceiverIndexRoute
   '/receiver/food/$id': typeof ReceiverFoodIdRoute
@@ -156,6 +165,7 @@ export interface FileRouteTypes {
     | '/provider/posts'
     | '/provider/requests'
     | '/receiver/requests'
+    | '/receiver/scan'
     | '/provider/'
     | '/receiver/'
     | '/receiver/food/$id'
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
     | '/provider/posts'
     | '/provider/requests'
     | '/receiver/requests'
+    | '/receiver/scan'
     | '/provider'
     | '/receiver'
     | '/receiver/food/$id'
@@ -186,6 +197,7 @@ export interface FileRouteTypes {
     | '/provider/posts'
     | '/provider/requests'
     | '/receiver/requests'
+    | '/receiver/scan'
     | '/provider/'
     | '/receiver/'
     | '/receiver/food/$id'
@@ -241,6 +253,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/provider/'
       preLoaderRoute: typeof ProviderIndexRouteImport
       parentRoute: typeof ProviderRoute
+    }
+    '/receiver/scan': {
+      id: '/receiver/scan'
+      path: '/scan'
+      fullPath: '/receiver/scan'
+      preLoaderRoute: typeof ReceiverScanRouteImport
+      parentRoute: typeof ReceiverRoute
     }
     '/receiver/requests': {
       id: '/receiver/requests'
@@ -335,12 +354,14 @@ const ProviderRouteWithChildren = ProviderRoute._addFileChildren(
 
 interface ReceiverRouteChildren {
   ReceiverRequestsRoute: typeof ReceiverRequestsRoute
+  ReceiverScanRoute: typeof ReceiverScanRoute
   ReceiverIndexRoute: typeof ReceiverIndexRoute
   ReceiverFoodIdRoute: typeof ReceiverFoodIdRoute
 }
 
 const ReceiverRouteChildren: ReceiverRouteChildren = {
   ReceiverRequestsRoute: ReceiverRequestsRoute,
+  ReceiverScanRoute: ReceiverScanRoute,
   ReceiverIndexRoute: ReceiverIndexRoute,
   ReceiverFoodIdRoute: ReceiverFoodIdRoute,
 }
