@@ -20,6 +20,7 @@ const categories = [
 
 function CreatePost() {
   const nav = useNavigate();
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [form, setForm] = useState({
     title: "",
     category: categories[0].value,
@@ -152,17 +153,26 @@ function CreatePost() {
           />
         </Field>
 
-        <Field label="Hình ảnh (URL)">
-          <div className="relative">
-            <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+        <Field label="Hình ảnh">
+          <label className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-border rounded-2xl cursor-pointer hover:border-primary transition">
+            <ImageIcon className="size-8 text-muted-foreground mb-2" />
+
+            <span className="font-medium">{imageFile ? imageFile.name : "Chọn ảnh thực phẩm"}</span>
+
+            <span className="text-sm text-muted-foreground mt-1">PNG, JPG hoặc JPEG</span>
+
             <input
-              type="url"
-              placeholder="https://... (dán link ảnh; upload sẽ xử lý sau)"
-              className="w-full h-11 pl-10 pr-4 rounded-xl border border-input bg-background focus:border-primary outline-none"
-              value={form.imageUrl}
-              onChange={set("imageUrl")}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  setImageFile(file);
+                }
+              }}
             />
-          </div>
+          </label>
         </Field>
 
         <Field label="Địa điểm">
