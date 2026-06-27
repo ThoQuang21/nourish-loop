@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ReceiverRouteImport } from './routes/receiver'
 import { Route as ProviderRouteImport } from './routes/provider'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
@@ -20,6 +21,11 @@ import { Route as ProviderCreateRouteImport } from './routes/provider.create'
 import { Route as AuthRegisterRouteImport } from './routes/auth.register'
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
 
+const ReceiverRoute = ReceiverRouteImport.update({
+  id: '/receiver',
+  path: '/receiver',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProviderRoute = ProviderRouteImport.update({
   id: '/provider',
   path: '/provider',
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/provider': typeof ProviderRouteWithChildren
+  '/receiver': typeof ReceiverRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/provider/create': typeof ProviderCreateRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
+  '/receiver': typeof ReceiverRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/provider/create': typeof ProviderCreateRoute
@@ -99,6 +107,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/provider': typeof ProviderRouteWithChildren
+  '/receiver': typeof ReceiverRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/provider/create': typeof ProviderCreateRoute
@@ -113,6 +122,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/provider'
+    | '/receiver'
     | '/auth/login'
     | '/auth/register'
     | '/provider/create'
@@ -124,6 +134,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/receiver'
     | '/auth/login'
     | '/auth/register'
     | '/provider/create'
@@ -136,6 +147,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/provider'
+    | '/receiver'
     | '/auth/login'
     | '/auth/register'
     | '/provider/create'
@@ -149,10 +161,18 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRouteWithChildren
   ProviderRoute: typeof ProviderRouteWithChildren
+  ReceiverRoute: typeof ReceiverRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/receiver': {
+      id: '/receiver'
+      path: '/receiver'
+      fullPath: '/receiver'
+      preLoaderRoute: typeof ReceiverRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/provider': {
       id: '/provider'
       path: '/provider'
@@ -262,6 +282,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
   ProviderRoute: ProviderRouteWithChildren,
+  ReceiverRoute: ReceiverRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
