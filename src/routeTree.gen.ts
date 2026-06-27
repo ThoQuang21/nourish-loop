@@ -17,6 +17,7 @@ import { Route as ReceiverIndexRouteImport } from './routes/receiver.index'
 import { Route as ProviderIndexRouteImport } from './routes/provider.index'
 import { Route as ReceiverScanRouteImport } from './routes/receiver.scan'
 import { Route as ReceiverRequestsRouteImport } from './routes/receiver.requests'
+import { Route as ReceiverHistoryRouteImport } from './routes/receiver.history'
 import { Route as ProviderRequestsRouteImport } from './routes/provider.requests'
 import { Route as ProviderPostsRouteImport } from './routes/provider.posts'
 import { Route as ProviderEsgRouteImport } from './routes/provider.esg'
@@ -63,6 +64,11 @@ const ReceiverScanRoute = ReceiverScanRouteImport.update({
 const ReceiverRequestsRoute = ReceiverRequestsRouteImport.update({
   id: '/requests',
   path: '/requests',
+  getParentRoute: () => ReceiverRoute,
+} as any)
+const ReceiverHistoryRoute = ReceiverHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
   getParentRoute: () => ReceiverRoute,
 } as any)
 const ProviderRequestsRoute = ProviderRequestsRouteImport.update({
@@ -112,6 +118,7 @@ export interface FileRoutesByFullPath {
   '/provider/esg': typeof ProviderEsgRoute
   '/provider/posts': typeof ProviderPostsRoute
   '/provider/requests': typeof ProviderRequestsRoute
+  '/receiver/history': typeof ReceiverHistoryRoute
   '/receiver/requests': typeof ReceiverRequestsRoute
   '/receiver/scan': typeof ReceiverScanRoute
   '/provider/': typeof ProviderIndexRoute
@@ -127,6 +134,7 @@ export interface FileRoutesByTo {
   '/provider/esg': typeof ProviderEsgRoute
   '/provider/posts': typeof ProviderPostsRoute
   '/provider/requests': typeof ProviderRequestsRoute
+  '/receiver/history': typeof ReceiverHistoryRoute
   '/receiver/requests': typeof ReceiverRequestsRoute
   '/receiver/scan': typeof ReceiverScanRoute
   '/provider': typeof ProviderIndexRoute
@@ -145,6 +153,7 @@ export interface FileRoutesById {
   '/provider/esg': typeof ProviderEsgRoute
   '/provider/posts': typeof ProviderPostsRoute
   '/provider/requests': typeof ProviderRequestsRoute
+  '/receiver/history': typeof ReceiverHistoryRoute
   '/receiver/requests': typeof ReceiverRequestsRoute
   '/receiver/scan': typeof ReceiverScanRoute
   '/provider/': typeof ProviderIndexRoute
@@ -164,6 +173,7 @@ export interface FileRouteTypes {
     | '/provider/esg'
     | '/provider/posts'
     | '/provider/requests'
+    | '/receiver/history'
     | '/receiver/requests'
     | '/receiver/scan'
     | '/provider/'
@@ -179,6 +189,7 @@ export interface FileRouteTypes {
     | '/provider/esg'
     | '/provider/posts'
     | '/provider/requests'
+    | '/receiver/history'
     | '/receiver/requests'
     | '/receiver/scan'
     | '/provider'
@@ -196,6 +207,7 @@ export interface FileRouteTypes {
     | '/provider/esg'
     | '/provider/posts'
     | '/provider/requests'
+    | '/receiver/history'
     | '/receiver/requests'
     | '/receiver/scan'
     | '/provider/'
@@ -266,6 +278,13 @@ declare module '@tanstack/react-router' {
       path: '/requests'
       fullPath: '/receiver/requests'
       preLoaderRoute: typeof ReceiverRequestsRouteImport
+      parentRoute: typeof ReceiverRoute
+    }
+    '/receiver/history': {
+      id: '/receiver/history'
+      path: '/history'
+      fullPath: '/receiver/history'
+      preLoaderRoute: typeof ReceiverHistoryRouteImport
       parentRoute: typeof ReceiverRoute
     }
     '/provider/requests': {
@@ -353,6 +372,7 @@ const ProviderRouteWithChildren = ProviderRoute._addFileChildren(
 )
 
 interface ReceiverRouteChildren {
+  ReceiverHistoryRoute: typeof ReceiverHistoryRoute
   ReceiverRequestsRoute: typeof ReceiverRequestsRoute
   ReceiverScanRoute: typeof ReceiverScanRoute
   ReceiverIndexRoute: typeof ReceiverIndexRoute
@@ -360,6 +380,7 @@ interface ReceiverRouteChildren {
 }
 
 const ReceiverRouteChildren: ReceiverRouteChildren = {
+  ReceiverHistoryRoute: ReceiverHistoryRoute,
   ReceiverRequestsRoute: ReceiverRequestsRoute,
   ReceiverScanRoute: ReceiverScanRoute,
   ReceiverIndexRoute: ReceiverIndexRoute,
