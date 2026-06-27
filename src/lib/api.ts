@@ -431,3 +431,56 @@ export function getRequest(id: string): Promise<ReceiverRequestDTO> {
 export function cancelRequest(id: string): Promise<ReceiverRequestDTO> {
   return request<ReceiverRequestDTO>(`/requests/${id}/cancel`, { method: "PATCH" });
 }
+
+export interface ReceiverHistoryItem {
+  id: string;
+  date: string | null;
+  providerName: string;
+  providerOrg: string;
+  item: string;
+  image: string;
+  kg: number;
+  co2SavedKg: number;
+  status: string;
+  rated: boolean;
+  ratingScore: number | null;
+}
+
+/** Lịch sử nhận (giao dịch đã hoàn tất) của receiver. */
+export function listHistory(receiverId: string): Promise<ReceiverHistoryItem[]> {
+  return request<ReceiverHistoryItem[]>(`/requests/history${qs({ receiverId })}`);
+}
+
+// ===================== STORIES (câu chuyện tác động) =====================
+export interface StoryDTO {
+  id: string;
+  author: string;
+  org: string;
+  avatar: string;
+  image: string;
+  text: string;
+  thanksTo: string;
+  daysAgo: number;
+  likes: number;
+  status: string;
+}
+
+export function listStories(): Promise<StoryDTO[]> {
+  return request<StoryDTO[]>("/stories");
+}
+
+export function createStory(input: {
+  text: string;
+  imageUrl?: string;
+  thanksToProviderId?: string;
+}): Promise<StoryDTO> {
+  const authorId = getCurrentUser()?.id;
+  return request<StoryDTO>("/stories", {
+    method: "POST",
+    body: JSON.stringify({ ...input, authorId }),
+  });
+}
+
+export function likeStory(id: string): Promise<{ id: string; likes: number }> {
+  return request(`/stories/${id}/like`, { method: "POST" });
+}
