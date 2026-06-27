@@ -156,8 +156,28 @@ export function listMyPosts(query: {
   return request<FoodPostDTO[]>(`/provider/posts${qs(query)}`);
 }
 
-export function getMyPost(id: string): Promise<FoodPostDTO & Record<string, unknown>> {
-  return request(`/provider/posts/${id}`);
+export interface ProviderPostDetail extends FoodPostDTO {
+  requests: IncomingRequestDTO[];
+  transactions: {
+    id: string;
+    qrCode: string;
+    confirmedByProvider: boolean;
+    confirmedByReceiver: boolean;
+    completedAt: string | null;
+  }[];
+  provider: {
+    id: string;
+    name: string;
+    org: string;
+    trustScore: number;
+    level: "verified" | "community";
+    avatar: string;
+    address: string;
+  };
+}
+
+export function getMyPost(id: string): Promise<ProviderPostDetail> {
+  return request<ProviderPostDetail>(`/provider/posts/${id}`);
 }
 
 export function createPost(input: CreatePostInput): Promise<FoodPostDTO> {
@@ -317,6 +337,8 @@ export interface ProviderBrief {
 }
 
 export interface PublicPostDTO extends FoodPostDTO {
+  lat: number | null;
+  lng: number | null;
   provider: ProviderBrief;
 }
 
@@ -328,6 +350,35 @@ export function listPosts(
 
 export function getPublicPost(id: string): Promise<PublicPostDTO> {
   return request<PublicPostDTO>(`/posts/${id}`);
+}
+
+export interface LatLng {
+  lat: number;
+  lng: number;
+}
+
+/** Vị trí của người đang đăng nhập (lấy từ toạ độ hồ sơ trong session). */
+export function getUserLocation(): LatLng | null {
+  const p = getCurrentUser()?.profile as
+    | { lat?: number | null; lng?: number | null }
+    | null
+    | undefined;
+  if (p && typeof p.lat === "number" && typeof p.lng === "number") {
+    return { lat: p.lat, lng: p.lng };
+  }
+  return null;
+}
+
+/** Khoảng cách đường chim bay (km) giữa 2 toạ độ. */
+export function haversineKm(a: LatLng, b: LatLng): number {
+  const R = 6371;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.asin(Math.sqrt(h));
 }
 
 // ===================== RECEIVER: REQUESTS =====================

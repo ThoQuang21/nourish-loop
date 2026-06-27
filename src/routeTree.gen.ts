@@ -35,6 +35,7 @@ import { Route as AdminStoriesRouteImport } from './routes/admin.stories'
 import { Route as AdminRequestsRouteImport } from './routes/admin.requests'
 import { Route as AdminPostsRouteImport } from './routes/admin.posts'
 import { Route as ReceiverFoodIdRouteImport } from './routes/receiver.food.$id'
+import { Route as ProviderPostIdRouteImport } from './routes/provider.post.$id'
 
 const ReceiverRoute = ReceiverRouteImport.update({
   id: '/receiver',
@@ -166,6 +167,11 @@ const ReceiverFoodIdRoute = ReceiverFoodIdRouteImport.update({
   path: '/food/$id',
   getParentRoute: () => ReceiverRoute,
 } as any)
+const ProviderPostIdRoute = ProviderPostIdRouteImport.update({
+  id: '/post/$id',
+  path: '/post/$id',
+  getParentRoute: () => ProviderRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -193,6 +199,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/provider/': typeof ProviderIndexRoute
   '/receiver/': typeof ReceiverIndexRoute
+  '/provider/post/$id': typeof ProviderPostIdRoute
   '/receiver/food/$id': typeof ReceiverFoodIdRoute
 }
 export interface FileRoutesByTo {
@@ -218,6 +225,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/provider': typeof ProviderIndexRoute
   '/receiver': typeof ReceiverIndexRoute
+  '/provider/post/$id': typeof ProviderPostIdRoute
   '/receiver/food/$id': typeof ReceiverFoodIdRoute
 }
 export interface FileRoutesById {
@@ -247,6 +255,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/provider/': typeof ProviderIndexRoute
   '/receiver/': typeof ReceiverIndexRoute
+  '/provider/post/$id': typeof ProviderPostIdRoute
   '/receiver/food/$id': typeof ReceiverFoodIdRoute
 }
 export interface FileRouteTypes {
@@ -277,6 +286,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/provider/'
     | '/receiver/'
+    | '/provider/post/$id'
     | '/receiver/food/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -302,6 +312,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/provider'
     | '/receiver'
+    | '/provider/post/$id'
     | '/receiver/food/$id'
   id:
     | '__root__'
@@ -330,6 +341,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/provider/'
     | '/receiver/'
+    | '/provider/post/$id'
     | '/receiver/food/$id'
   fileRoutesById: FileRoutesById
 }
@@ -527,6 +539,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReceiverFoodIdRouteImport
       parentRoute: typeof ReceiverRoute
     }
+    '/provider/post/$id': {
+      id: '/provider/post/$id'
+      path: '/post/$id'
+      fullPath: '/provider/post/$id'
+      preLoaderRoute: typeof ProviderPostIdRouteImport
+      parentRoute: typeof ProviderRoute
+    }
   }
 }
 
@@ -568,6 +587,7 @@ interface ProviderRouteChildren {
   ProviderPostsRoute: typeof ProviderPostsRoute
   ProviderRequestsRoute: typeof ProviderRequestsRoute
   ProviderIndexRoute: typeof ProviderIndexRoute
+  ProviderPostIdRoute: typeof ProviderPostIdRoute
 }
 
 const ProviderRouteChildren: ProviderRouteChildren = {
@@ -576,6 +596,7 @@ const ProviderRouteChildren: ProviderRouteChildren = {
   ProviderPostsRoute: ProviderPostsRoute,
   ProviderRequestsRoute: ProviderRequestsRoute,
   ProviderIndexRoute: ProviderIndexRoute,
+  ProviderPostIdRoute: ProviderPostIdRoute,
 }
 
 const ProviderRouteWithChildren = ProviderRoute._addFileChildren(

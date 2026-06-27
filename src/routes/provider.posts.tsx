@@ -109,7 +109,7 @@ function MyPosts() {
                   </div>
                   <div className="flex gap-2 pt-2 border-t border-border">
                     <Link
-                      to="/receiver/food/$id"
+                      to="/provider/post/$id"
                       params={{ id: p.id }}
                       className="flex-1 inline-flex items-center justify-center gap-1 text-xs font-semibold py-2 rounded-lg bg-secondary hover:bg-secondary/80"
                     >

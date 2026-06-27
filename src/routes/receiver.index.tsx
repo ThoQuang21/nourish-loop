@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Filter, Search, ShieldCheck, SlidersHorizontal } from "lucide-react";
+import { Filter, LocateFixed, Search, ShieldCheck, SlidersHorizontal } from "lucide-react";
 import { FoodCard } from "@/components/FoodCard";
-import { MapMock } from "@/components/MapMock";
-import { listPosts, type PublicPostDTO } from "@/lib/api";
+import { GoongMap } from "@/components/GoongMap";
+import { haversineKm, listPosts, type PublicPostDTO } from "@/lib/api";
+import { useUserLocation } from "@/lib/useUserLocation";
 
 export const Route = createFileRoute("/receiver/")({
   component: ReceiverMap,
@@ -18,6 +19,8 @@ function ReceiverMap() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const { location: userLoc, status: locStatus, refresh: refreshLoc } = useUserLocation();
+
   useEffect(() => {
     listPosts({ status: "OPEN" })
       .then(setPosts)
@@ -25,25 +28,40 @@ function ReceiverMap() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Backend chưa trả khoảng cách → tạm tính tượng trưng theo thứ tự để demo bộ lọc.
+  // Khoảng cách thật (Haversine) từ vị trí user tới từng tin (null nếu chưa có vị trí/toạ độ).
   const enriched = useMemo(
-    () => posts.map((p, i) => ({ ...p, distanceKm: 0.8 + i * 0.9 })),
-    [posts],
+    () =>
+      posts.map((p) => ({
+        ...p,
+        distanceKm:
+          userLoc && p.lat != null && p.lng != null
+            ? haversineKm(userLoc, { lat: p.lat, lng: p.lng })
+            : null,
+      })),
+    [posts, userLoc],
   );
 
-  const list = enriched.filter((p) => {
-    if (search && !p.title.toLowerCase().includes(search.toLowerCase())) return false;
-    if (verifiedOnly && p.provider.level !== "verified") return false;
-    if (p.distanceKm > maxDist) return false;
-    return true;
-  });
+  const list = useMemo(
+    () =>
+      enriched
+        .filter((p) => {
+          if (search && !p.title.toLowerCase().includes(search.toLowerCase())) return false;
+          if (verifiedOnly && p.provider.level !== "verified") return false;
+          if (p.distanceKm != null && p.distanceKm > maxDist) return false;
+          return true;
+        })
+        .sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity)),
+    [enriched, search, verifiedOnly, maxDist],
+  );
 
-  // MapMock cần toạ độ x,y (backend chưa có) → gán tượng trưng để vẫn hiển thị pin.
-  const mapPosts = list.map((p, i) => ({
-    ...p,
-    x: 15 + ((i * 29) % 70),
-    y: 18 + ((i * 43) % 62),
-  })) as unknown as Parameters<typeof MapMock>[0]["posts"];
+  const locLabel =
+    locStatus === "granted"
+      ? "Vị trí của bạn (realtime)"
+      : locStatus === "locating"
+        ? "Đang định vị..."
+        : locStatus === "denied"
+          ? "Đã chặn — dùng địa chỉ hồ sơ"
+          : "Định vị";
 
   return (
     <div className="flex flex-col h-[calc(100vh-0px)] md:h-screen overflow-hidden">
@@ -58,6 +76,16 @@ function ReceiverMap() {
             className="w-full h-10 pl-10 pr-4 rounded-xl bg-secondary border border-transparent focus:border-primary focus:bg-card outline-none text-sm"
           />
         </div>
+        <button
+          onClick={refreshLoc}
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition ${
+            locStatus === "granted"
+              ? "bg-primary text-primary-foreground border-primary"
+              : "bg-card border-border hover:bg-secondary"
+          }`}
+        >
+          <LocateFixed className="size-3.5" /> {locLabel}
+        </button>
         <FilterChip active={verifiedOnly} onClick={() => setVerifiedOnly((v) => !v)}>
           <ShieldCheck className="size-3.5" /> Chỉ Verified
         </FilterChip>
@@ -65,7 +93,6 @@ function ReceiverMap() {
           <Filter className="size-3.5" /> Loại thực phẩm
         </FilterChip>
         <FilterChip>Khối lượng</FilterChip>
-        <FilterChip>Thời gian</FilterChip>
         <div className="hidden md:flex items-center gap-2 text-xs">
           <SlidersHorizontal className="size-4 text-muted-foreground" />
           <span>≤ {maxDist} km</span>
@@ -83,8 +110,9 @@ function ReceiverMap() {
       <div className="flex-1 grid lg:grid-cols-[1fr_440px] xl:grid-cols-[1fr_520px] min-h-0">
         {/* Map */}
         <div className="p-4 md:p-6 min-h-[300px] lg:min-h-0">
-          <MapMock
-            posts={mapPosts}
+          <GoongMap
+            posts={list}
+            userLocation={userLoc}
             activeId={activeId}
             onSelect={(id) => setActiveId(id)}
             height="100%"
@@ -115,7 +143,7 @@ function ReceiverMap() {
                   onMouseEnter={() => setActiveId(p.id)}
                   className={activeId === p.id ? "ring-2 ring-primary rounded-2xl" : ""}
                 >
-                  <FoodCard post={p} provider={p.provider} distanceKm={p.distanceKm} />
+                  <FoodCard post={p} provider={p.provider} distanceKm={p.distanceKm ?? undefined} />
                 </div>
               ))
             )}

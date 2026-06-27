@@ -159,7 +159,7 @@ function AdminDashboard() {
           </div>
           <div className="space-y-3">
             {[...unverifiedProviders.slice(0, 2), ...unverifiedReceivers.slice(0, 2)].map((u) => (
-              <div key={"id" in u ? u.id : u.org} className="flex items-center gap-3 p-3 rounded-xl bg-secondary/50">
+              <div key={u.id} className="flex items-center gap-3 p-3 rounded-xl bg-secondary/50">
                 <img src={u.avatar} alt="" className="size-9 rounded-full object-cover" />
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-sm truncate">{u.org}</div>
