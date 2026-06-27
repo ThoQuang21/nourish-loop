@@ -1,7 +1,8 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import { Leaf } from "lucide-react";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Leaf, LogOut } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/AuthContext";
 
 interface NavItem {
   to: string;
@@ -18,6 +19,13 @@ interface AppShellProps {
 export function AppShell({ role, nav, children }: AppShellProps) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const roleLabel = role === "provider" ? "Nhà cung cấp" : "Người nhận";
+  const { user, logout } = useAuth();
+  const nav_ = useNavigate();
+
+  function handleLogout() {
+    logout();
+    nav_({ to: "/auth/login" });
+  }
 
   return (
     <div className="min-h-screen flex bg-background">
@@ -52,21 +60,28 @@ export function AppShell({ role, nav, children }: AppShellProps) {
             );
           })}
         </nav>
-        <div className="p-4 border-t border-border">
+        <div className="p-4 border-t border-border space-y-1">
           <Link
             to="/profile"
             className="flex items-center gap-3 p-2 rounded-xl hover:bg-secondary transition-colors"
           >
             <img
-              src="https://i.pravatar.cc/80?img=11"
+              src={user?.avatar ?? "https://i.pravatar.cc/80?img=11"}
               alt=""
               className="size-9 rounded-full object-cover"
             />
-            <div className="text-sm">
-              <div className="font-semibold leading-tight">Minh Anh</div>
-              <div className="text-xs text-muted-foreground">Xem hồ sơ</div>
+            <div className="text-sm min-w-0">
+              <div className="font-semibold leading-tight truncate">{user?.name ?? "–"}</div>
+              <div className="text-xs text-muted-foreground truncate">{user?.org}</div>
             </div>
           </Link>
+          <button
+            onClick={handleLogout}
+            className="flex w-full items-center gap-3 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+          >
+            <LogOut className="size-4" />
+            Đăng xuất
+          </button>
         </div>
       </aside>
 

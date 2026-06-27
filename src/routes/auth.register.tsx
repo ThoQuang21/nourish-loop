@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Heart, Upload } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 export const Route = createFileRoute("/auth/register")({
   component: Register,
@@ -9,6 +10,7 @@ export const Route = createFileRoute("/auth/register")({
 function Register() {
   const [role, setRole] = useState<"provider" | "receiver">("provider");
   const nav = useNavigate();
+  const { login } = useAuth();
 
   return (
     <div className="space-y-6">
@@ -51,6 +53,7 @@ function Register() {
         className="space-y-3"
         onSubmit={(e) => {
           e.preventDefault();
+          login(role);
           nav({ to: role === "provider" ? "/provider" : "/receiver" });
         }}
       >

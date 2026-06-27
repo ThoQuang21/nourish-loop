@@ -1,12 +1,18 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Navigate, Outlet } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { BarChart3, History, LayoutDashboard, PackagePlus, Inbox } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 export const Route = createFileRoute("/provider")({
   component: ProviderLayout,
 });
 
 function ProviderLayout() {
+  const { isAuthenticated, user } = useAuth();
+
+  if (!isAuthenticated) return <Navigate to="/auth/login" />;
+  if (user?.role !== "provider") return <Navigate to="/receiver" />;
+
   return (
     <AppShell
       role="provider"
