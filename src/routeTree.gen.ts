@@ -13,6 +13,7 @@ import { Route as ReceiverRouteImport } from './routes/receiver'
 import { Route as ProviderRouteImport } from './routes/provider'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ReceiverIndexRouteImport } from './routes/receiver.index'
 import { Route as ProviderIndexRouteImport } from './routes/provider.index'
 import { Route as ProviderRequestsRouteImport } from './routes/provider.requests'
 import { Route as ProviderPostsRouteImport } from './routes/provider.posts'
@@ -40,6 +41,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ReceiverIndexRoute = ReceiverIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ReceiverRoute,
 } as any)
 const ProviderIndexRoute = ProviderIndexRouteImport.update({
   id: '/',
@@ -81,7 +87,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/provider': typeof ProviderRouteWithChildren
-  '/receiver': typeof ReceiverRoute
+  '/receiver': typeof ReceiverRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/provider/create': typeof ProviderCreateRoute
@@ -89,11 +95,11 @@ export interface FileRoutesByFullPath {
   '/provider/posts': typeof ProviderPostsRoute
   '/provider/requests': typeof ProviderRequestsRoute
   '/provider/': typeof ProviderIndexRoute
+  '/receiver/': typeof ReceiverIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
-  '/receiver': typeof ReceiverRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/provider/create': typeof ProviderCreateRoute
@@ -101,13 +107,14 @@ export interface FileRoutesByTo {
   '/provider/posts': typeof ProviderPostsRoute
   '/provider/requests': typeof ProviderRequestsRoute
   '/provider': typeof ProviderIndexRoute
+  '/receiver': typeof ReceiverIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/provider': typeof ProviderRouteWithChildren
-  '/receiver': typeof ReceiverRoute
+  '/receiver': typeof ReceiverRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/provider/create': typeof ProviderCreateRoute
@@ -115,6 +122,7 @@ export interface FileRoutesById {
   '/provider/posts': typeof ProviderPostsRoute
   '/provider/requests': typeof ProviderRequestsRoute
   '/provider/': typeof ProviderIndexRoute
+  '/receiver/': typeof ReceiverIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -130,11 +138,11 @@ export interface FileRouteTypes {
     | '/provider/posts'
     | '/provider/requests'
     | '/provider/'
+    | '/receiver/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
-    | '/receiver'
     | '/auth/login'
     | '/auth/register'
     | '/provider/create'
@@ -142,6 +150,7 @@ export interface FileRouteTypes {
     | '/provider/posts'
     | '/provider/requests'
     | '/provider'
+    | '/receiver'
   id:
     | '__root__'
     | '/'
@@ -155,13 +164,14 @@ export interface FileRouteTypes {
     | '/provider/posts'
     | '/provider/requests'
     | '/provider/'
+    | '/receiver/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRouteWithChildren
   ProviderRoute: typeof ProviderRouteWithChildren
-  ReceiverRoute: typeof ReceiverRoute
+  ReceiverRoute: typeof ReceiverRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -193,6 +203,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/receiver/': {
+      id: '/receiver/'
+      path: '/'
+      fullPath: '/receiver/'
+      preLoaderRoute: typeof ReceiverIndexRouteImport
+      parentRoute: typeof ReceiverRoute
     }
     '/provider/': {
       id: '/provider/'
@@ -278,11 +295,23 @@ const ProviderRouteWithChildren = ProviderRoute._addFileChildren(
   ProviderRouteChildren,
 )
 
+interface ReceiverRouteChildren {
+  ReceiverIndexRoute: typeof ReceiverIndexRoute
+}
+
+const ReceiverRouteChildren: ReceiverRouteChildren = {
+  ReceiverIndexRoute: ReceiverIndexRoute,
+}
+
+const ReceiverRouteWithChildren = ReceiverRoute._addFileChildren(
+  ReceiverRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
   ProviderRoute: ProviderRouteWithChildren,
-  ReceiverRoute: ReceiverRoute,
+  ReceiverRoute: ReceiverRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
