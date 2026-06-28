@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Clock, Image as ImageIcon, MapPin, Scale } from "lucide-react";
-import { createPost, getCurrentUser } from "@/lib/api";
+import { createPost, getCurrentUser, uploadPostImage, type MatchInput } from "@/lib/api";
+import { MatchSuggestions } from "@/components/MatchSuggestions";
 
 export const Route = createFileRoute("/provider/create")({
   component: CreatePost,
@@ -21,6 +22,7 @@ const categories = [
 function CreatePost() {
   const nav = useNavigate();
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [form, setForm] = useState({
     title: "",
     category: categories[0].value,
@@ -34,6 +36,23 @@ function CreatePost() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Chọn ảnh: lưu file + tạo URL xem trước. Thu hồi URL cũ để tránh rò bộ nhớ.
+  function pickImage(file: File) {
+    setImageFile(file);
+    setPreviewUrl((old) => {
+      if (old) URL.revokeObjectURL(old);
+      return URL.createObjectURL(file);
+    });
+  }
+
+  // Thu hồi URL xem trước khi rời trang.
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -46,13 +65,20 @@ function CreatePost() {
 
     setLoading(true);
     try {
+      // 1) Nếu có chọn ảnh -> upload lên Supabase qua backend, lấy URL công khai.
+      let imageUrl = form.imageUrl || undefined;
+      if (imageFile) {
+        const uploaded = await uploadPostImage(imageFile);
+        imageUrl = uploaded.imageUrl;
+      }
+      // 2) Tạo tin với imageUrl đã upload.
       await createPost({
         title: form.title,
         category: form.category,
         weightKg: Number(form.weightKg),
         address: form.address,
         ...(form.description ? { description: form.description } : {}),
-        ...(form.imageUrl ? { imageUrl: form.imageUrl } : {}),
+        ...(imageUrl ? { imageUrl } : {}),
         ...(form.pickupWindow ? { pickupWindow: form.pickupWindow } : {}),
         ...(form.expiresInHours ? { expiresInHours: Number(form.expiresInHours) } : {}),
       });
@@ -68,6 +94,18 @@ function CreatePost() {
     (k: keyof typeof form) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
       setForm({ ...form, [k]: e.target.value });
+
+  // Nháp tin để gợi ý người nhận (đủ danh mục + khối lượng + địa điểm mới chấm điểm).
+  const matchDraft: MatchInput | null =
+    form.category && Number(form.weightKg) > 0 && form.address
+      ? {
+          category: form.category,
+          weightKg: Number(form.weightKg),
+          address: form.address,
+          ...(form.title.length >= 3 ? { title: form.title } : {}),
+          ...(form.pickupWindow ? { pickupWindow: form.pickupWindow } : {}),
+        }
+      : null;
 
   return (
     <div className="p-6 lg:p-10 max-w-3xl mx-auto">
@@ -154,22 +192,31 @@ function CreatePost() {
         </Field>
 
         <Field label="Hình ảnh">
-          <label className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-border rounded-2xl cursor-pointer hover:border-primary transition">
-            <ImageIcon className="size-8 text-muted-foreground mb-2" />
-
-            <span className="font-medium">{imageFile ? imageFile.name : "Chọn ảnh thực phẩm"}</span>
-
-            <span className="text-sm text-muted-foreground mt-1">PNG, JPG hoặc JPEG</span>
-
+          <label className="relative flex flex-col items-center justify-center w-full h-44 border-2 border-dashed border-border rounded-2xl cursor-pointer hover:border-primary transition overflow-hidden bg-background">
+            {previewUrl ? (
+              <>
+                <img src={previewUrl} alt="Xem trước" className="absolute inset-0 size-full object-cover" />
+                <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition grid place-items-center text-white text-sm font-medium">
+                  Đổi ảnh khác
+                </div>
+                <span className="absolute bottom-2 left-2 right-2 truncate text-xs text-white/90 bg-black/40 rounded px-2 py-1">
+                  {imageFile?.name}
+                </span>
+              </>
+            ) : (
+              <>
+                <ImageIcon className="size-8 text-muted-foreground mb-2" />
+                <span className="font-medium">Chọn ảnh thực phẩm</span>
+                <span className="text-sm text-muted-foreground mt-1">PNG, JPG hoặc JPEG</span>
+              </>
+            )}
             <input
               type="file"
               accept="image/*"
               className="hidden"
               onChange={(e) => {
                 const file = e.target.files?.[0];
-                if (file) {
-                  setImageFile(file);
-                }
+                if (file) pickImage(file);
               }}
             />
           </label>
@@ -206,6 +253,10 @@ function CreatePost() {
           </button>
         </div>
       </form>
+
+      <div className="mt-6">
+        <MatchSuggestions draft={matchDraft} />
+      </div>
     </div>
   );
 }

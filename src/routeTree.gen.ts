@@ -20,6 +20,7 @@ import { Route as ReceiverIndexRouteImport } from './routes/receiver.index'
 import { Route as ProviderIndexRouteImport } from './routes/provider.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ReceiverStoriesRouteImport } from './routes/receiver.stories'
+import { Route as ReceiverSettingsRouteImport } from './routes/receiver.settings'
 import { Route as ReceiverScanRouteImport } from './routes/receiver.scan'
 import { Route as ReceiverRequestsRouteImport } from './routes/receiver.requests'
 import { Route as ReceiverHistoryRouteImport } from './routes/receiver.history'
@@ -90,6 +91,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
 const ReceiverStoriesRoute = ReceiverStoriesRouteImport.update({
   id: '/stories',
   path: '/stories',
+  getParentRoute: () => ReceiverRoute,
+} as any)
+const ReceiverSettingsRoute = ReceiverSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => ReceiverRoute,
 } as any)
 const ReceiverScanRoute = ReceiverScanRouteImport.update({
@@ -195,6 +201,7 @@ export interface FileRoutesByFullPath {
   '/receiver/history': typeof ReceiverHistoryRoute
   '/receiver/requests': typeof ReceiverRequestsRoute
   '/receiver/scan': typeof ReceiverScanRoute
+  '/receiver/settings': typeof ReceiverSettingsRoute
   '/receiver/stories': typeof ReceiverStoriesRoute
   '/admin/': typeof AdminIndexRoute
   '/provider/': typeof ProviderIndexRoute
@@ -221,6 +228,7 @@ export interface FileRoutesByTo {
   '/receiver/history': typeof ReceiverHistoryRoute
   '/receiver/requests': typeof ReceiverRequestsRoute
   '/receiver/scan': typeof ReceiverScanRoute
+  '/receiver/settings': typeof ReceiverSettingsRoute
   '/receiver/stories': typeof ReceiverStoriesRoute
   '/admin': typeof AdminIndexRoute
   '/provider': typeof ProviderIndexRoute
@@ -251,6 +259,7 @@ export interface FileRoutesById {
   '/receiver/history': typeof ReceiverHistoryRoute
   '/receiver/requests': typeof ReceiverRequestsRoute
   '/receiver/scan': typeof ReceiverScanRoute
+  '/receiver/settings': typeof ReceiverSettingsRoute
   '/receiver/stories': typeof ReceiverStoriesRoute
   '/admin/': typeof AdminIndexRoute
   '/provider/': typeof ProviderIndexRoute
@@ -282,6 +291,7 @@ export interface FileRouteTypes {
     | '/receiver/history'
     | '/receiver/requests'
     | '/receiver/scan'
+    | '/receiver/settings'
     | '/receiver/stories'
     | '/admin/'
     | '/provider/'
@@ -308,6 +318,7 @@ export interface FileRouteTypes {
     | '/receiver/history'
     | '/receiver/requests'
     | '/receiver/scan'
+    | '/receiver/settings'
     | '/receiver/stories'
     | '/admin'
     | '/provider'
@@ -337,6 +348,7 @@ export interface FileRouteTypes {
     | '/receiver/history'
     | '/receiver/requests'
     | '/receiver/scan'
+    | '/receiver/settings'
     | '/receiver/stories'
     | '/admin/'
     | '/provider/'
@@ -432,6 +444,13 @@ declare module '@tanstack/react-router' {
       path: '/stories'
       fullPath: '/receiver/stories'
       preLoaderRoute: typeof ReceiverStoriesRouteImport
+      parentRoute: typeof ReceiverRoute
+    }
+    '/receiver/settings': {
+      id: '/receiver/settings'
+      path: '/settings'
+      fullPath: '/receiver/settings'
+      preLoaderRoute: typeof ReceiverSettingsRouteImport
       parentRoute: typeof ReceiverRoute
     }
     '/receiver/scan': {
@@ -607,6 +626,7 @@ interface ReceiverRouteChildren {
   ReceiverHistoryRoute: typeof ReceiverHistoryRoute
   ReceiverRequestsRoute: typeof ReceiverRequestsRoute
   ReceiverScanRoute: typeof ReceiverScanRoute
+  ReceiverSettingsRoute: typeof ReceiverSettingsRoute
   ReceiverStoriesRoute: typeof ReceiverStoriesRoute
   ReceiverIndexRoute: typeof ReceiverIndexRoute
   ReceiverFoodIdRoute: typeof ReceiverFoodIdRoute
@@ -616,6 +636,7 @@ const ReceiverRouteChildren: ReceiverRouteChildren = {
   ReceiverHistoryRoute: ReceiverHistoryRoute,
   ReceiverRequestsRoute: ReceiverRequestsRoute,
   ReceiverScanRoute: ReceiverScanRoute,
+  ReceiverSettingsRoute: ReceiverSettingsRoute,
   ReceiverStoriesRoute: ReceiverStoriesRoute,
   ReceiverIndexRoute: ReceiverIndexRoute,
   ReceiverFoodIdRoute: ReceiverFoodIdRoute,

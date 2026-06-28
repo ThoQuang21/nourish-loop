@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Check, Clock, MapPin, Scale, ShieldCheck, Star, X } from "lucide-react";
-import { getMyPost, respondToRequest, type ProviderPostDetail } from "@/lib/api";
+import { getMyPost, respondToRequest, type MatchInput, type ProviderPostDetail } from "@/lib/api";
+import { MatchSuggestions } from "@/components/MatchSuggestions";
 
 export const Route = createFileRoute("/provider/post/$id")({
   component: PostDetailPage,
@@ -64,6 +65,14 @@ function PostDetailPage() {
   }
 
   const s = STATUS[post.status] ?? STATUS.open;
+
+  const matchDraft: MatchInput = {
+    category: post.category,
+    weightKg: post.weightKg,
+    address: post.address,
+    ...(post.title.length >= 3 ? { title: post.title } : {}),
+    ...(post.pickupWindow ? { pickupWindow: post.pickupWindow } : {}),
+  };
 
   return (
     <div className="p-6 lg:p-10 max-w-5xl mx-auto">
@@ -151,6 +160,10 @@ function PostDetailPage() {
               ))}
             </div>
           )}
+
+          <div className="mt-6">
+            <MatchSuggestions draft={matchDraft} auto />
+          </div>
         </aside>
       </div>
     </div>

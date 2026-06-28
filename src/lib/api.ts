@@ -198,6 +198,54 @@ export function deletePost(id: string): Promise<FoodPostDTO> {
   return request<FoodPostDTO>(`/provider/posts/${id}`, { method: "DELETE" });
 }
 
+// ===================== PROVIDER: MATCHING (gợi ý người nhận) =====================
+export interface MatchInput {
+  category: string;
+  weightKg: number;
+  address: string;
+  title?: string;
+  description?: string;
+  district?: string;
+  lat?: number;
+  lng?: number;
+  pickupWindow?: string;
+}
+
+export interface MatchCandidate {
+  receiverId: string;
+  receiverName: string;
+  receiverOrg: string;
+  receiverAddress: string;
+  verified: boolean;
+  trustScore: number;
+  distanceKm: number | null;
+  capacityLeftKg: number | null;
+  availabilityLabel: string;
+  autoAcceptMatch: boolean;
+  matchScore: number;
+  matchPercent: number;
+  reasons: string[];
+  breakdown: {
+    distanceScore: number;
+    ratingScore: number;
+    capacityScore: number;
+    availabilityScore: number;
+  };
+}
+
+export interface MatchPreview {
+  formula: { distance: number; rating: number; capacity: number; availability: number };
+  matches: MatchCandidate[];
+  postDraft: Record<string, unknown>;
+}
+
+export function previewMatches(input: MatchInput): Promise<MatchPreview> {
+  return request<MatchPreview>("/provider/matching/preview", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
 // ===================== PROVIDER: REQUESTS (incoming) =====================
 export interface IncomingRequestDTO {
   id: string;
@@ -246,18 +294,24 @@ export interface NotificationDTO {
   type: "request" | "accepted" | "reminder" | "expiring";
   title: string;
   body: string;
+  postId: string | null;
   time: string;
   unread: boolean;
 }
 
+// Notifications dùng chung mọi vai trò (đọc theo x-user-id từ session).
 export function listNotifications(unread?: boolean): Promise<NotificationDTO[]> {
   return request<NotificationDTO[]>(
-    `/provider/notifications${unread === undefined ? "" : qs({ unread })}`,
+    `/notifications${unread === undefined ? "" : qs({ unread })}`,
   );
 }
 
 export function markNotificationRead(id: string): Promise<NotificationDTO> {
-  return request<NotificationDTO>(`/provider/notifications/${id}/read`, { method: "PATCH" });
+  return request<NotificationDTO>(`/notifications/${id}/read`, { method: "PATCH" });
+}
+
+export function markAllNotificationsRead(): Promise<{ updated: number }> {
+  return request<{ updated: number }>(`/notifications/read-all`, { method: "PATCH" });
 }
 
 // ===================== PROVIDER: IMPACT / ESG =====================
@@ -432,6 +486,15 @@ export function cancelRequest(id: string): Promise<ReceiverRequestDTO> {
   return request<ReceiverRequestDTO>(`/requests/${id}/cancel`, { method: "PATCH" });
 }
 
+/** Receiver xác nhận đã nhận → đóng đơn (hoàn tất giao dịch). */
+export function confirmReceived(requestId: string): Promise<ReceiverRequestDTO> {
+  const receiverId = getCurrentUser()?.id;
+  return request<ReceiverRequestDTO>(
+    `/requests/${requestId}/complete${qs({ receiverId })}`,
+    { method: "PATCH" },
+  );
+}
+
 export interface ReceiverHistoryItem {
   id: string;
   date: string | null;
@@ -449,6 +512,19 @@ export interface ReceiverHistoryItem {
 /** Lịch sử nhận (giao dịch đã hoàn tất) của receiver. */
 export function listHistory(receiverId: string): Promise<ReceiverHistoryItem[]> {
   return request<ReceiverHistoryItem[]>(`/requests/history${qs({ receiverId })}`);
+}
+
+/** Đánh giá đối phương sau giao dịch hoàn tất (raterId lấy từ session). */
+export function createReview(input: {
+  transactionId: string;
+  score: number;
+  comment?: string;
+}): Promise<{ success: boolean; trustScore: number }> {
+  const raterId = getCurrentUser()?.id;
+  return request("/reviews", {
+    method: "POST",
+    body: JSON.stringify({ ...input, raterId }),
+  });
 }
 
 // ===================== STORIES (câu chuyện tác động) =====================
@@ -483,4 +559,41 @@ export function createStory(input: {
 
 export function likeStory(id: string): Promise<{ id: string; likes: number }> {
   return request(`/stories/${id}/like`, { method: "POST" });
+}
+
+// ===================== RECEIVER: CẤU HÌNH MATCHING =====================
+export interface OperatingHour {
+  weekday: string; // MON..SUN
+  openTime: string; // "08:00"
+  closeTime: string; // "17:00"
+  isActive: boolean;
+}
+
+export interface MatchingSettings {
+  maxCapacityKg: number | null;
+  currentLoadKg: number | null;
+  serviceRadiusKm: number | null;
+  autoAcceptMatch: boolean;
+  matchingEnabled: boolean;
+  acceptsPreparedMeals: boolean;
+  acceptsBreadCereal: boolean;
+  acceptsVegetables: boolean;
+  acceptsFruits: boolean;
+  acceptsDairy: boolean;
+  acceptsDryGoods: boolean;
+  acceptsOther: boolean;
+  operatingHours: OperatingHour[];
+}
+
+export function getMatchingSettings(receiverId: string): Promise<MatchingSettings> {
+  return request<MatchingSettings>(`/receiver/settings${qs({ receiverId })}`);
+}
+
+export function updateMatchingSettings(
+  input: Partial<MatchingSettings> & { receiverId: string },
+): Promise<MatchingSettings> {
+  return request<MatchingSettings>("/receiver/settings", {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
 }

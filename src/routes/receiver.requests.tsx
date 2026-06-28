@@ -1,6 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { getCurrentUser, listMyRequests, type ReceiverRequestDTO } from "@/lib/api";
+import { Check } from "lucide-react";
+import {
+  confirmReceived,
+  getCurrentUser,
+  listMyRequests,
+  type ReceiverRequestDTO,
+} from "@/lib/api";
 
 export const Route = createFileRoute("/receiver/requests")({
   component: MyRequests,
@@ -18,20 +24,42 @@ function MyRequests() {
   const [items, setItems] = useState<ReceiverRequestDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
   const me = getCurrentUser();
 
-  useEffect(() => {
+  async function load() {
     if (!me) {
       setLoading(false);
       setError("Vui lòng đăng nhập để xem yêu cầu của bạn.");
       return;
     }
-    listMyRequests({ receiverId: me.id })
-      .then(setItems)
-      .catch((e) => setError(e instanceof Error ? e.message : "Không tải được yêu cầu"))
-      .finally(() => setLoading(false));
+    try {
+      setItems(await listMyRequests({ receiverId: me.id }));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Không tải được yêu cầu");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  async function confirm(id: string) {
+    setBusy(id);
+    setError(null);
+    try {
+      await confirmReceived(id);
+      setTab("COMPLETED");
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Xác nhận thất bại");
+    } finally {
+      setBusy(null);
+    }
+  }
 
   const list = items.filter((i) => i.status === tab);
   const countOf = (k: string) => items.filter((i) => i.status === k).length;
@@ -68,28 +96,44 @@ function MyRequests() {
       ) : (
         <div className="space-y-4">
           {list.map((i) => (
-            <Link
+            <div
               key={i.id}
-              to="/receiver/food/$id"
-              params={{ id: i.postId }}
-              className="bg-card border border-border rounded-2xl p-4 flex gap-4 items-center hover:shadow-soft transition"
+              className="bg-card border border-border rounded-2xl p-4 flex gap-4 items-center"
             >
-              <img
-                src={i.post?.imageUrl ?? ""}
-                alt=""
-                className="size-20 rounded-xl object-cover bg-muted"
-              />
-              <div className="flex-1 min-w-0">
-                <div className="font-semibold line-clamp-1">{i.post?.title ?? "Tin đã xoá"}</div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  {i.post?.weightKg ?? "?"}kg · {i.post?.district ?? "—"}
+              <Link
+                to="/receiver/food/$id"
+                params={{ id: i.postId }}
+                className="flex gap-4 items-center flex-1 min-w-0 hover:opacity-90"
+              >
+                <img
+                  src={i.post?.imageUrl ?? ""}
+                  alt=""
+                  className="size-20 rounded-xl object-cover bg-muted shrink-0"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold line-clamp-1">{i.post?.title ?? "Tin đã xoá"}</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {i.post?.weightKg ?? "?"}kg · {i.post?.district ?? "—"}
+                  </div>
+                  {i.message && (
+                    <div className="text-xs text-muted-foreground mt-1 line-clamp-1">“{i.message}”</div>
+                  )}
                 </div>
-                {i.message && (
-                  <div className="text-xs text-muted-foreground mt-1 line-clamp-1">“{i.message}”</div>
+              </Link>
+
+              <div className="flex flex-col items-end gap-2 shrink-0">
+                <StatusBadge status={i.status} />
+                {i.status === "ACCEPTED" && (
+                  <button
+                    onClick={() => confirm(i.id)}
+                    disabled={busy === i.id}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 disabled:opacity-60"
+                  >
+                    <Check className="size-3.5" /> {busy === i.id ? "Đang xác nhận..." : "Xác nhận đã nhận"}
+                  </button>
                 )}
               </div>
-              <StatusBadge status={i.status} />
-            </Link>
+            </div>
           ))}
         </div>
       )}
