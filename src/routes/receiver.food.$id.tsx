@@ -1,12 +1,13 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Clock, MapPin, Scale, ShieldCheck, Star } from "lucide-react";
+import { ArrowLeft, Clock, MapPin, Navigation, Scale, ShieldCheck, Star } from "lucide-react";
 import {
   createRequest,
   getCurrentUser,
   getPublicPost,
   type PublicPostDTO,
 } from "@/lib/api";
+import { useUserLocation } from "@/lib/useUserLocation";
 
 export const Route = createFileRoute("/receiver/food/$id")({
   component: FoodDetail,
@@ -21,6 +22,7 @@ function FoodDetail() {
   const [submitting, setSubmitting] = useState(false);
   const [requested, setRequested] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const { location: userLoc } = useUserLocation();
 
   useEffect(() => {
     getPublicPost(id)
@@ -28,6 +30,16 @@ function FoodDetail() {
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
   }, [id]);
+
+  function openDirections() {
+    if (!post?.lat || !post?.lng) return;
+    const dest = `${post.lat},${post.lng}`;
+    const origin = userLoc ? `&origin=${userLoc.lat},${userLoc.lng}` : "";
+    window.open(
+      `https://www.google.com/maps/dir/?api=1&destination=${dest}${origin}&travelmode=driving`,
+      "_blank",
+    );
+  }
 
   async function register() {
     const me = getCurrentUser();
@@ -100,8 +112,18 @@ function FoodDetail() {
 
           <div className="mt-8">
             <h3 className="font-bold text-lg mb-3">Vị trí</h3>
-            <div className="rounded-2xl border border-border bg-card p-5 text-sm text-muted-foreground inline-flex items-center gap-2">
-              <MapPin className="size-4" /> {post.address}
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="rounded-2xl border border-border bg-card p-5 text-sm text-muted-foreground inline-flex items-center gap-2">
+                <MapPin className="size-4" /> {post.address}
+              </div>
+              {post.lat != null && post.lng != null && (
+                <button
+                  onClick={openDirections}
+                  className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90"
+                >
+                  <Navigation className="size-4" /> Chỉ đường
+                </button>
+              )}
             </div>
           </div>
         </div>

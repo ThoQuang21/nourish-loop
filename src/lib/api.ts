@@ -597,3 +597,15 @@ export function updateMatchingSettings(
     body: JSON.stringify(input),
   });
 }
+
+// ===================== SMS (prototype) =====================
+export function getSmsStatus(): Promise<{ enabled: boolean; mode: string }> {
+  return request("/sms/status");
+}
+
+export function sendTestSms(phone: string, text?: string): Promise<{ mode: string; sentTo: string }> {
+  return request("/sms/test", {
+    method: "POST",
+    body: JSON.stringify({ phone, ...(text ? { text } : {}) }),
+  });
+}

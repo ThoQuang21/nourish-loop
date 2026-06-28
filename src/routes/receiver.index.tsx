@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Filter, LocateFixed, Search, ShieldCheck, SlidersHorizontal } from "lucide-react";
+import { LocateFixed, Search, ShieldCheck, SlidersHorizontal } from "lucide-react";
 import { FoodCard } from "@/components/FoodCard";
 import { GoongMap } from "@/components/GoongMap";
 import { haversineKm, listPosts, type PublicPostDTO } from "@/lib/api";
@@ -10,11 +10,24 @@ export const Route = createFileRoute("/receiver/")({
   component: ReceiverMap,
 });
 
+// Nhãn danh mục khớp với dữ liệu backend trả về (post.category).
+const CATEGORIES = [
+  "Bữa ăn nấu sẵn",
+  "Bánh mì & ngũ cốc",
+  "Rau củ quả",
+  "Trái cây",
+  "Sữa & sản phẩm",
+  "Lương thực khô",
+  "Khác",
+];
+
 function ReceiverMap() {
   const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("");
+  const [minKg, setMinKg] = useState(0);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [maxDist, setMaxDist] = useState(10);
+  const [maxDist, setMaxDist] = useState(20);
   const [posts, setPosts] = useState<PublicPostDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,13 +58,23 @@ function ReceiverMap() {
     () =>
       enriched
         .filter((p) => {
-          if (search && !p.title.toLowerCase().includes(search.toLowerCase())) return false;
+          const q = search.trim().toLowerCase();
+          if (
+            q &&
+            !p.title.toLowerCase().includes(q) &&
+            !p.provider.org.toLowerCase().includes(q) &&
+            !p.provider.name.toLowerCase().includes(q)
+          )
+            return false;
+          if (category && p.category !== category) return false;
+          if (minKg && p.weightKg < minKg) return false;
           if (verifiedOnly && p.provider.level !== "verified") return false;
           if (p.distanceKm != null && p.distanceKm > maxDist) return false;
           return true;
         })
+        // Sắp xếp gần nhất theo khoảng cách từ vị trí hiện tại (tin chưa có toạ độ xếp cuối).
         .sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity)),
-    [enriched, search, verifiedOnly, maxDist],
+    [enriched, search, category, minKg, verifiedOnly, maxDist],
   );
 
   const locLabel =
@@ -89,10 +112,32 @@ function ReceiverMap() {
         <FilterChip active={verifiedOnly} onClick={() => setVerifiedOnly((v) => !v)}>
           <ShieldCheck className="size-3.5" /> Chỉ Verified
         </FilterChip>
-        <FilterChip>
-          <Filter className="size-3.5" /> Loại thực phẩm
-        </FilterChip>
-        <FilterChip>Khối lượng</FilterChip>
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className={`h-9 px-3 rounded-full text-xs font-semibold border outline-none transition ${
+            category ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border hover:bg-secondary"
+          }`}
+        >
+          <option value="">Tất cả loại</option>
+          {CATEGORIES.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
+        <select
+          value={minKg}
+          onChange={(e) => setMinKg(Number(e.target.value))}
+          className={`h-9 px-3 rounded-full text-xs font-semibold border outline-none transition ${
+            minKg ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border hover:bg-secondary"
+          }`}
+        >
+          <option value={0}>Mọi khối lượng</option>
+          <option value={5}>≥ 5kg</option>
+          <option value={10}>≥ 10kg</option>
+          <option value={20}>≥ 20kg</option>
+        </select>
         <div className="hidden md:flex items-center gap-2 text-xs">
           <SlidersHorizontal className="size-4 text-muted-foreground" />
           <span>≤ {maxDist} km</span>
@@ -123,8 +168,12 @@ function ReceiverMap() {
         <div className="border-t lg:border-t-0 lg:border-l border-border bg-background overflow-y-auto">
           <div className="p-5 sticky top-0 bg-background/95 backdrop-blur border-b border-border z-10">
             <div className="flex items-baseline justify-between">
-              <h2 className="font-bold text-lg">{list.length} bài đăng gần bạn</h2>
-              <button className="text-xs font-semibold text-primary">Sắp xếp: Gần nhất</button>
+              <h2 className="font-bold text-lg">
+                {list.length} bài đăng{userLoc ? " gần bạn" : ""}
+              </h2>
+              <span className="text-xs font-semibold text-primary">
+                {userLoc ? "Sắp xếp: Gần nhất" : "Bật định vị để sắp gần nhất"}
+              </span>
             </div>
           </div>
           <div className="p-5 space-y-4">

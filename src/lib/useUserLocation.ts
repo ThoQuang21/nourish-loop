@@ -11,6 +11,12 @@ export type LocationStatus =
 export type PermissionState = "granted" | "prompt" | "denied" | "unsupported";
 
 /**
+ * MOCK vị trí hiện tại (để test). Đặt = null để dùng GPS/permissions thật.
+ * Hiện đang giả lập tại Trường ĐH Quốc tế (IU) — Khu ĐHQG, Thủ Đức, TP.HCM.
+ */
+const MOCK_LOCATION: LatLng | null = { lat: 10.8780, lng: 106.8019 };
+
+/**
  * Vị trí realtime qua Geolocation API (watchPosition), kết hợp Permissions API:
  * - Biết trước trạng thái quyền (granted/prompt/denied) mà KHÔNG cần prompt.
  * - Nếu đã "denied" thì không gọi geolocation nữa, fallback toạ độ hồ sơ ngay.
@@ -39,6 +45,13 @@ export function useUserLocation(): {
   }
 
   function startWatch() {
+    // MOCK: bỏ qua GPS, dùng vị trí giả lập.
+    if (MOCK_LOCATION) {
+      setLocation(MOCK_LOCATION);
+      setStatus("granted");
+      setPermission("granted");
+      return;
+    }
     if (typeof navigator === "undefined" || !navigator.geolocation) {
       setLocation(getUserLocation());
       setStatus("unavailable");
@@ -99,7 +112,11 @@ export function useUserLocation(): {
       startWatch();
     }
 
-    void init();
+    if (MOCK_LOCATION) {
+      startWatch(); // dùng vị trí mock, bỏ qua permissions/GPS
+    } else {
+      void init();
+    }
     return () => {
       cancelled = true;
       if (permStatus) permStatus.onchange = null;

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "@goongmaps/goong-js/dist/goong-js.css";
 import type { LatLng } from "@/lib/api";
+import { getRoute } from "@/lib/routing";
 
 const MAPTILES_KEY = (import.meta as any).env?.VITE_GOONG_MAPTILES_KEY as string | undefined;
 // Trung tâm TP.HCM [lng, lat]
@@ -28,6 +29,9 @@ export function GoongMap({ posts, userLocation, activeId, onSelect, height = "10
   const goongRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
   const [ready, setReady] = useState(false);
+  const [routeInfo, setRouteInfo] = useState<{ distanceKm: number; durationMin: number } | null>(
+    null,
+  );
 
   // Khởi tạo map một lần — import SDK động để KHÔNG chạy lúc SSR (tránh "self is not defined").
   useEffect(() => {
@@ -116,6 +120,64 @@ export function GoongMap({ posts, userLocation, activeId, onSelect, height = "10
     }
   }, [posts, userLocation, activeId, ready, onSelect]);
 
+  // Tuyến đường THẬT tới tin đang chọn (OSRM). Vẽ đường thẳng tạm rồi thay bằng route khi có.
+  useEffect(() => {
+    const map = mapRef.current;
+    const goongjs = goongRef.current;
+    if (!map || !goongjs || !ready) return;
+
+    const active = posts.find((p) => p.id === activeId && p.lat != null && p.lng != null);
+    let cancelled = false;
+
+    function applyRoute(coords: [number, number][]) {
+      const data =
+        coords.length >= 2
+          ? { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: coords } }
+          : { type: "FeatureCollection", features: [] };
+      const src = map.getSource("route");
+      if (src) {
+        src.setData(data);
+      } else {
+        map.addSource("route", { type: "geojson", data });
+        map.addLayer({
+          id: "route-line",
+          type: "line",
+          source: "route",
+          layout: { "line-cap": "round", "line-join": "round" },
+          paint: { "line-color": "#2563eb", "line-width": 4 },
+        });
+      }
+    }
+
+    if (!userLocation || !active) {
+      applyRoute([]);
+      setRouteInfo(null);
+      return;
+    }
+
+    // Đường thẳng tạm trong lúc chờ OSRM.
+    applyRoute([
+      [userLocation.lng, userLocation.lat],
+      [active.lng as number, active.lat as number],
+    ]);
+
+    void getRoute(userLocation, { lat: active.lat as number, lng: active.lng as number }).then(
+      (r) => {
+        if (cancelled) return;
+        if (r) {
+          applyRoute(r.coordinates);
+          setRouteInfo({ distanceKm: r.distanceKm, durationMin: r.durationMin });
+        } else {
+          setRouteInfo(null);
+        }
+      },
+    );
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeId, userLocation, posts, ready]);
+
   if (!MAPTILES_KEY) {
     return (
       <div
@@ -127,5 +189,14 @@ export function GoongMap({ posts, userLocation, activeId, onSelect, height = "10
     );
   }
 
-  return <div ref={containerRef} style={{ height, borderRadius: 16, overflow: "hidden" }} />;
+  return (
+    <div style={{ position: "relative", height }}>
+      <div ref={containerRef} style={{ height: "100%", borderRadius: 16, overflow: "hidden" }} />
+      {routeInfo && (
+        <div className="absolute top-3 left-3 bg-card border border-border rounded-xl px-3 py-2 text-xs font-semibold shadow-card">
+          🚗 {routeInfo.distanceKm.toFixed(1)} km · {Math.round(routeInfo.durationMin)} phút
+        </div>
+      )}
+    </div>
+  );
 }

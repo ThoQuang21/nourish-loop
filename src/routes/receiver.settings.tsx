@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import {
   getCurrentUser,
   getMatchingSettings,
+  getSmsStatus,
+  sendTestSms,
   updateMatchingSettings,
   type MatchingSettings,
   type OperatingHour,
@@ -40,6 +42,35 @@ function ReceiverSettings() {
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // SMS prototype
+  const [smsMode, setSmsMode] = useState<string | null>(null);
+  const [smsBusy, setSmsBusy] = useState(false);
+  const [smsResult, setSmsResult] = useState<string | null>(null);
+
+  useEffect(() => {
+    getSmsStatus().then((st) => setSmsMode(st.mode)).catch(() => undefined);
+  }, []);
+
+  async function testSms() {
+    if (!me?.phone) {
+      setSmsResult("Tài khoản chưa có số điện thoại — cập nhật hồ sơ trước.");
+      return;
+    }
+    setSmsBusy(true);
+    setSmsResult(null);
+    try {
+      const r = await sendTestSms(me.phone);
+      setSmsResult(
+        r.mode === "live"
+          ? `Đã gửi SMS thật tới ${r.sentTo}.`
+          : `Dry-run: tin nhắn đã được ghi log ở server (tới ${r.sentTo}).`,
+      );
+    } catch (e) {
+      setSmsResult(e instanceof Error ? e.message : "Gửi thất bại");
+    } finally {
+      setSmsBusy(false);
+    }
+  }
 
   useEffect(() => {
     if (!me) {
@@ -125,6 +156,31 @@ function ReceiverSettings() {
           checked={s.autoAcceptMatch}
           onChange={(v) => upd("autoAcceptMatch", v)}
         />
+      </section>
+
+      {/* Thông báo SMS (prototype) */}
+      <section className="bg-card border border-border rounded-3xl p-5 lg:p-6">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <div className="font-semibold text-sm">Thông báo qua SMS</div>
+            <div className="text-xs text-muted-foreground">
+              Nhận gợi ý bài đăng phù hợp qua tin nhắn ·{" "}
+              <span className="font-medium">
+                {smsMode === "live" ? "đang gửi thật" : "chế độ dry-run (chỉ log)"}
+              </span>
+              {me?.phone ? ` · số: ${me.phone}` : " · chưa có SĐT"}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={testSms}
+            disabled={smsBusy}
+            className="px-4 py-2 rounded-xl border border-border text-sm font-semibold hover:bg-secondary disabled:opacity-60 shrink-0"
+          >
+            {smsBusy ? "Đang gửi..." : "Gửi SMS thử"}
+          </button>
+        </div>
+        {smsResult && <p className="text-xs text-primary mt-2">{smsResult}</p>}
       </section>
 
       {/* Sức chứa & bán kính */}
