@@ -514,6 +514,21 @@ export function listHistory(receiverId: string): Promise<ReceiverHistoryItem[]> 
   return request<ReceiverHistoryItem[]>(`/requests/history${qs({ receiverId })}`);
 }
 
+export interface ReviewReceived {
+  id: string;
+  score: number;
+  comment: string;
+  raterName: string;
+  raterOrg: string;
+  raterAvatar: string;
+  daysAgo: number;
+}
+
+/** Đánh giá NHẬN ĐƯỢC của một user (cho trang hồ sơ). */
+export function getReviewsForUser(userId: string): Promise<ReviewReceived[]> {
+  return request<ReviewReceived[]>(`/reviews${qs({ userId })}`);
+}
+
 /** Đánh giá đối phương sau giao dịch hoàn tất (raterId lấy từ session). */
 export function createReview(input: {
   transactionId: string;
