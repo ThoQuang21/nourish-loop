@@ -1,7 +1,13 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { ArrowLeft, Clock, MapPin, Scale, ShieldCheck, Star } from "lucide-react";
-import { getPost, getProvider } from "@/lib/mock-data";
-import { MapMock } from "@/components/MapMock";
+import { useEffect, useState } from "react";
+import { ArrowLeft, Clock, MapPin, Navigation, Scale, ShieldCheck, Star } from "lucide-react";
+import {
+  createRequest,
+  getCurrentUser,
+  getPublicPost,
+  type PublicPostDTO,
+} from "@/lib/api";
+import { useUserLocation } from "@/lib/useUserLocation";
 
 export const Route = createFileRoute("/receiver/food/$id")({
   component: FoodDetail,
@@ -9,8 +15,56 @@ export const Route = createFileRoute("/receiver/food/$id")({
 
 function FoodDetail() {
   const { id } = useParams({ from: "/receiver/food/$id" });
-  const post = getPost(id);
-  if (!post) {
+  const [post, setPost] = useState<PublicPostDTO | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+
+  const [submitting, setSubmitting] = useState(false);
+  const [requested, setRequested] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+  const { location: userLoc } = useUserLocation();
+
+  useEffect(() => {
+    getPublicPost(id)
+      .then(setPost)
+      .catch(() => setNotFound(true))
+      .finally(() => setLoading(false));
+  }, [id]);
+
+  function openDirections() {
+    if (!post?.lat || !post?.lng) return;
+    const dest = `${post.lat},${post.lng}`;
+    const origin = userLoc ? `&origin=${userLoc.lat},${userLoc.lng}` : "";
+    window.open(
+      `https://www.google.com/maps/dir/?api=1&destination=${dest}${origin}&travelmode=driving`,
+      "_blank",
+    );
+  }
+
+  async function register() {
+    const me = getCurrentUser();
+    if (!me) {
+      setMsg("Vui lòng đăng nhập để đăng ký nhận.");
+      return;
+    }
+    setSubmitting(true);
+    setMsg(null);
+    try {
+      await createRequest({ postId: id, receiverId: me.id });
+      setRequested(true);
+      setMsg("Đã gửi yêu cầu nhận thành công!");
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : "Gửi yêu cầu thất bại");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (loading) {
+    return <div className="p-10 text-sm text-muted-foreground">Đang tải...</div>;
+  }
+
+  if (notFound || !post) {
     return (
       <div className="p-10">
         <p>Không tìm thấy bài đăng.</p>
@@ -18,7 +72,8 @@ function FoodDetail() {
       </div>
     );
   }
-  const provider = getProvider(post.providerId);
+
+  const provider = post.provider;
 
   return (
     <div className="p-6 lg:p-10 max-w-5xl mx-auto">
@@ -57,14 +112,26 @@ function FoodDetail() {
 
           <div className="mt-8">
             <h3 className="font-bold text-lg mb-3">Vị trí</h3>
-            <MapMock posts={[post]} activeId={post.id} height="280px" />
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="rounded-2xl border border-border bg-card p-5 text-sm text-muted-foreground inline-flex items-center gap-2">
+                <MapPin className="size-4" /> {post.address}
+              </div>
+              {post.lat != null && post.lng != null && (
+                <button
+                  onClick={openDirections}
+                  className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90"
+                >
+                  <Navigation className="size-4" /> Chỉ đường
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
         <aside className="space-y-5">
           <div className="bg-card border border-border rounded-3xl p-6 shadow-card">
             <div className="flex items-center gap-3">
-              <img src={provider.avatar} alt="" className="size-14 rounded-full object-cover" />
+              <img src={provider.avatar} alt="" className="size-14 rounded-full object-cover bg-muted" />
               <div className="flex-1 min-w-0">
                 <div className="font-bold">{provider.org}</div>
                 <div className="text-xs text-muted-foreground">{provider.name}</div>
@@ -96,12 +163,22 @@ function FoodDetail() {
             </div>
           </div>
 
-          <button className="w-full h-12 rounded-2xl bg-primary text-primary-foreground font-semibold shadow-soft hover:bg-primary/90">
-            Đăng ký nhận
+          <button
+            onClick={register}
+            disabled={submitting || requested}
+            className="w-full h-12 rounded-2xl bg-primary text-primary-foreground font-semibold shadow-soft hover:bg-primary/90 disabled:opacity-60"
+          >
+            {requested ? "Đã gửi yêu cầu" : submitting ? "Đang gửi..." : "Đăng ký nhận"}
           </button>
           <button className="w-full h-12 rounded-2xl bg-card border border-border font-semibold hover:bg-secondary">
             Nhắn cho nhà cung cấp
           </button>
+
+          {msg && (
+            <div className={`text-sm text-center ${requested ? "text-primary" : "text-destructive"}`}>
+              {msg}
+            </div>
+          )}
 
           <div className="text-xs text-muted-foreground text-center px-4">
             Food Life không kiểm tra hoặc lưu trữ thực phẩm. Vui lòng kiểm tra trực tiếp khi nhận.

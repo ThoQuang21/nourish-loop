@@ -14,10 +14,13 @@ import { Route as ProviderRouteImport } from './routes/provider'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ReceiverIndexRouteImport } from './routes/receiver.index'
 import { Route as ProviderIndexRouteImport } from './routes/provider.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as ReceiverStoriesRouteImport } from './routes/receiver.stories'
+import { Route as ReceiverSettingsRouteImport } from './routes/receiver.settings'
 import { Route as ReceiverScanRouteImport } from './routes/receiver.scan'
 import { Route as ReceiverRequestsRouteImport } from './routes/receiver.requests'
 import { Route as ReceiverHistoryRouteImport } from './routes/receiver.history'
@@ -27,7 +30,13 @@ import { Route as ProviderEsgRouteImport } from './routes/provider.esg'
 import { Route as ProviderCreateRouteImport } from './routes/provider.create'
 import { Route as AuthRegisterRouteImport } from './routes/auth.register'
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
+import { Route as AdminVerificationsRouteImport } from './routes/admin.verifications'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminStoriesRouteImport } from './routes/admin.stories'
+import { Route as AdminRequestsRouteImport } from './routes/admin.requests'
+import { Route as AdminPostsRouteImport } from './routes/admin.posts'
 import { Route as ReceiverFoodIdRouteImport } from './routes/receiver.food.$id'
+import { Route as ProviderPostIdRouteImport } from './routes/provider.post.$id'
 
 const ReceiverRoute = ReceiverRouteImport.update({
   id: '/receiver',
@@ -54,6 +63,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -69,9 +83,19 @@ const ProviderIndexRoute = ProviderIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ProviderRoute,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const ReceiverStoriesRoute = ReceiverStoriesRouteImport.update({
   id: '/stories',
   path: '/stories',
+  getParentRoute: () => ReceiverRoute,
+} as any)
+const ReceiverSettingsRoute = ReceiverSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => ReceiverRoute,
 } as any)
 const ReceiverScanRoute = ReceiverScanRouteImport.update({
@@ -119,19 +143,55 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => AuthRoute,
 } as any)
+const AdminVerificationsRoute = AdminVerificationsRouteImport.update({
+  id: '/verifications',
+  path: '/verifications',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminStoriesRoute = AdminStoriesRouteImport.update({
+  id: '/stories',
+  path: '/stories',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRequestsRoute = AdminRequestsRouteImport.update({
+  id: '/requests',
+  path: '/requests',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPostsRoute = AdminPostsRouteImport.update({
+  id: '/posts',
+  path: '/posts',
+  getParentRoute: () => AdminRoute,
+} as any)
 const ReceiverFoodIdRoute = ReceiverFoodIdRouteImport.update({
   id: '/food/$id',
   path: '/food/$id',
   getParentRoute: () => ReceiverRoute,
 } as any)
+const ProviderPostIdRoute = ProviderPostIdRouteImport.update({
+  id: '/post/$id',
+  path: '/post/$id',
+  getParentRoute: () => ProviderRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/notifications': typeof NotificationsRoute
   '/profile': typeof ProfileRoute
   '/provider': typeof ProviderRouteWithChildren
   '/receiver': typeof ReceiverRouteWithChildren
+  '/admin/posts': typeof AdminPostsRoute
+  '/admin/requests': typeof AdminRequestsRoute
+  '/admin/stories': typeof AdminStoriesRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/verifications': typeof AdminVerificationsRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/provider/create': typeof ProviderCreateRoute
@@ -141,9 +201,12 @@ export interface FileRoutesByFullPath {
   '/receiver/history': typeof ReceiverHistoryRoute
   '/receiver/requests': typeof ReceiverRequestsRoute
   '/receiver/scan': typeof ReceiverScanRoute
+  '/receiver/settings': typeof ReceiverSettingsRoute
   '/receiver/stories': typeof ReceiverStoriesRoute
+  '/admin/': typeof AdminIndexRoute
   '/provider/': typeof ProviderIndexRoute
   '/receiver/': typeof ReceiverIndexRoute
+  '/provider/post/$id': typeof ProviderPostIdRoute
   '/receiver/food/$id': typeof ReceiverFoodIdRoute
 }
 export interface FileRoutesByTo {
@@ -151,6 +214,11 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRouteWithChildren
   '/notifications': typeof NotificationsRoute
   '/profile': typeof ProfileRoute
+  '/admin/posts': typeof AdminPostsRoute
+  '/admin/requests': typeof AdminRequestsRoute
+  '/admin/stories': typeof AdminStoriesRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/verifications': typeof AdminVerificationsRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/provider/create': typeof ProviderCreateRoute
@@ -160,19 +228,28 @@ export interface FileRoutesByTo {
   '/receiver/history': typeof ReceiverHistoryRoute
   '/receiver/requests': typeof ReceiverRequestsRoute
   '/receiver/scan': typeof ReceiverScanRoute
+  '/receiver/settings': typeof ReceiverSettingsRoute
   '/receiver/stories': typeof ReceiverStoriesRoute
+  '/admin': typeof AdminIndexRoute
   '/provider': typeof ProviderIndexRoute
   '/receiver': typeof ReceiverIndexRoute
+  '/provider/post/$id': typeof ProviderPostIdRoute
   '/receiver/food/$id': typeof ReceiverFoodIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/notifications': typeof NotificationsRoute
   '/profile': typeof ProfileRoute
   '/provider': typeof ProviderRouteWithChildren
   '/receiver': typeof ReceiverRouteWithChildren
+  '/admin/posts': typeof AdminPostsRoute
+  '/admin/requests': typeof AdminRequestsRoute
+  '/admin/stories': typeof AdminStoriesRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/verifications': typeof AdminVerificationsRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/provider/create': typeof ProviderCreateRoute
@@ -182,20 +259,29 @@ export interface FileRoutesById {
   '/receiver/history': typeof ReceiverHistoryRoute
   '/receiver/requests': typeof ReceiverRequestsRoute
   '/receiver/scan': typeof ReceiverScanRoute
+  '/receiver/settings': typeof ReceiverSettingsRoute
   '/receiver/stories': typeof ReceiverStoriesRoute
+  '/admin/': typeof AdminIndexRoute
   '/provider/': typeof ProviderIndexRoute
   '/receiver/': typeof ReceiverIndexRoute
+  '/provider/post/$id': typeof ProviderPostIdRoute
   '/receiver/food/$id': typeof ReceiverFoodIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/auth'
     | '/notifications'
     | '/profile'
     | '/provider'
     | '/receiver'
+    | '/admin/posts'
+    | '/admin/requests'
+    | '/admin/stories'
+    | '/admin/users'
+    | '/admin/verifications'
     | '/auth/login'
     | '/auth/register'
     | '/provider/create'
@@ -205,9 +291,12 @@ export interface FileRouteTypes {
     | '/receiver/history'
     | '/receiver/requests'
     | '/receiver/scan'
+    | '/receiver/settings'
     | '/receiver/stories'
+    | '/admin/'
     | '/provider/'
     | '/receiver/'
+    | '/provider/post/$id'
     | '/receiver/food/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -215,6 +304,11 @@ export interface FileRouteTypes {
     | '/auth'
     | '/notifications'
     | '/profile'
+    | '/admin/posts'
+    | '/admin/requests'
+    | '/admin/stories'
+    | '/admin/users'
+    | '/admin/verifications'
     | '/auth/login'
     | '/auth/register'
     | '/provider/create'
@@ -224,18 +318,27 @@ export interface FileRouteTypes {
     | '/receiver/history'
     | '/receiver/requests'
     | '/receiver/scan'
+    | '/receiver/settings'
     | '/receiver/stories'
+    | '/admin'
     | '/provider'
     | '/receiver'
+    | '/provider/post/$id'
     | '/receiver/food/$id'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/auth'
     | '/notifications'
     | '/profile'
     | '/provider'
     | '/receiver'
+    | '/admin/posts'
+    | '/admin/requests'
+    | '/admin/stories'
+    | '/admin/users'
+    | '/admin/verifications'
     | '/auth/login'
     | '/auth/register'
     | '/provider/create'
@@ -245,14 +348,18 @@ export interface FileRouteTypes {
     | '/receiver/history'
     | '/receiver/requests'
     | '/receiver/scan'
+    | '/receiver/settings'
     | '/receiver/stories'
+    | '/admin/'
     | '/provider/'
     | '/receiver/'
+    | '/provider/post/$id'
     | '/receiver/food/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
   NotificationsRoute: typeof NotificationsRoute
   ProfileRoute: typeof ProfileRoute
@@ -297,6 +404,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -318,11 +432,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProviderIndexRouteImport
       parentRoute: typeof ProviderRoute
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/receiver/stories': {
       id: '/receiver/stories'
       path: '/stories'
       fullPath: '/receiver/stories'
       preLoaderRoute: typeof ReceiverStoriesRouteImport
+      parentRoute: typeof ReceiverRoute
+    }
+    '/receiver/settings': {
+      id: '/receiver/settings'
+      path: '/settings'
+      fullPath: '/receiver/settings'
+      preLoaderRoute: typeof ReceiverSettingsRouteImport
       parentRoute: typeof ReceiverRoute
     }
     '/receiver/scan': {
@@ -388,6 +516,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/admin/verifications': {
+      id: '/admin/verifications'
+      path: '/verifications'
+      fullPath: '/admin/verifications'
+      preLoaderRoute: typeof AdminVerificationsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/stories': {
+      id: '/admin/stories'
+      path: '/stories'
+      fullPath: '/admin/stories'
+      preLoaderRoute: typeof AdminStoriesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/requests': {
+      id: '/admin/requests'
+      path: '/requests'
+      fullPath: '/admin/requests'
+      preLoaderRoute: typeof AdminRequestsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/posts': {
+      id: '/admin/posts'
+      path: '/posts'
+      fullPath: '/admin/posts'
+      preLoaderRoute: typeof AdminPostsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/receiver/food/$id': {
       id: '/receiver/food/$id'
       path: '/food/$id'
@@ -395,8 +558,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReceiverFoodIdRouteImport
       parentRoute: typeof ReceiverRoute
     }
+    '/provider/post/$id': {
+      id: '/provider/post/$id'
+      path: '/post/$id'
+      fullPath: '/provider/post/$id'
+      preLoaderRoute: typeof ProviderPostIdRouteImport
+      parentRoute: typeof ProviderRoute
+    }
   }
 }
+
+interface AdminRouteChildren {
+  AdminPostsRoute: typeof AdminPostsRoute
+  AdminRequestsRoute: typeof AdminRequestsRoute
+  AdminStoriesRoute: typeof AdminStoriesRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+  AdminVerificationsRoute: typeof AdminVerificationsRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminPostsRoute: AdminPostsRoute,
+  AdminRequestsRoute: AdminRequestsRoute,
+  AdminStoriesRoute: AdminStoriesRoute,
+  AdminUsersRoute: AdminUsersRoute,
+  AdminVerificationsRoute: AdminVerificationsRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface AuthRouteChildren {
   AuthLoginRoute: typeof AuthLoginRoute
@@ -416,6 +606,7 @@ interface ProviderRouteChildren {
   ProviderPostsRoute: typeof ProviderPostsRoute
   ProviderRequestsRoute: typeof ProviderRequestsRoute
   ProviderIndexRoute: typeof ProviderIndexRoute
+  ProviderPostIdRoute: typeof ProviderPostIdRoute
 }
 
 const ProviderRouteChildren: ProviderRouteChildren = {
@@ -424,6 +615,7 @@ const ProviderRouteChildren: ProviderRouteChildren = {
   ProviderPostsRoute: ProviderPostsRoute,
   ProviderRequestsRoute: ProviderRequestsRoute,
   ProviderIndexRoute: ProviderIndexRoute,
+  ProviderPostIdRoute: ProviderPostIdRoute,
 }
 
 const ProviderRouteWithChildren = ProviderRoute._addFileChildren(
@@ -434,6 +626,7 @@ interface ReceiverRouteChildren {
   ReceiverHistoryRoute: typeof ReceiverHistoryRoute
   ReceiverRequestsRoute: typeof ReceiverRequestsRoute
   ReceiverScanRoute: typeof ReceiverScanRoute
+  ReceiverSettingsRoute: typeof ReceiverSettingsRoute
   ReceiverStoriesRoute: typeof ReceiverStoriesRoute
   ReceiverIndexRoute: typeof ReceiverIndexRoute
   ReceiverFoodIdRoute: typeof ReceiverFoodIdRoute
@@ -443,6 +636,7 @@ const ReceiverRouteChildren: ReceiverRouteChildren = {
   ReceiverHistoryRoute: ReceiverHistoryRoute,
   ReceiverRequestsRoute: ReceiverRequestsRoute,
   ReceiverScanRoute: ReceiverScanRoute,
+  ReceiverSettingsRoute: ReceiverSettingsRoute,
   ReceiverStoriesRoute: ReceiverStoriesRoute,
   ReceiverIndexRoute: ReceiverIndexRoute,
   ReceiverFoodIdRoute: ReceiverFoodIdRoute,
@@ -454,6 +648,7 @@ const ReceiverRouteWithChildren = ReceiverRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
   NotificationsRoute: NotificationsRoute,
   ProfileRoute: ProfileRoute,
@@ -463,3 +658,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

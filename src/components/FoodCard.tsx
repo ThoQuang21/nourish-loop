@@ -1,16 +1,31 @@
 import { Link } from "@tanstack/react-router";
 import { Clock, MapPin, Scale, ShieldCheck } from "lucide-react";
-import type { FoodPost } from "@/lib/mock-data";
 import { getProvider } from "@/lib/mock-data";
+import type { ProviderBrief } from "@/lib/api";
+
+/** Chỉ cần các field FoodCard dùng — nhận cả mock FoodPost lẫn PublicPostDTO. */
+interface CardPost {
+  id: string;
+  title: string;
+  category: string;
+  image: string;
+  pickupWindow: string;
+  weightKg: number;
+  district: string;
+  expiresInHours: number;
+  providerId: string;
+}
 
 interface Props {
-  post: FoodPost;
+  post: CardPost;
+  /** Provider từ API; nếu không truyền sẽ fallback về mock theo providerId. */
+  provider?: ProviderBrief;
   distanceKm?: number;
   compact?: boolean;
 }
 
-export function FoodCard({ post, distanceKm, compact }: Props) {
-  const provider = getProvider(post.providerId);
+export function FoodCard({ post, provider: providerProp, distanceKm, compact }: Props) {
+  const provider = providerProp ?? getProvider(post.providerId);
   const verified = provider.level === "verified";
 
   return (

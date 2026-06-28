@@ -1,14 +1,51 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Heart, Upload } from "lucide-react";
+import { login, register, setSession, type Role } from "@/lib/api";
 
 export const Route = createFileRoute("/auth/register")({
   component: Register,
 });
 
+const fields = [
+  { k: "fullName", l: "Họ và tên", p: "Nguyễn Văn A", t: "text" },
+  { k: "org", l: "Tổ chức", p: "Khách sạn / Nhà hàng / NGO...", t: "text" },
+  { k: "email", l: "Email", p: "ban@example.com", t: "email" },
+  { k: "phone", l: "Số điện thoại", p: "+84 ...", t: "tel" },
+  { k: "address", l: "Địa chỉ", p: "12 Lê Lợi, Quận 1, TP.HCM", t: "text" },
+  { k: "password", l: "Mật khẩu", p: "Ít nhất 6 ký tự", t: "password" },
+] as const;
+
 function Register() {
   const [role, setRole] = useState<"provider" | "receiver">("provider");
+  const [form, setForm] = useState({
+    fullName: "",
+    org: "",
+    email: "",
+    phone: "",
+    address: "",
+    password: "",
+  });
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const nav = useNavigate();
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      await register({ ...form, role: role.toUpperCase() as Role });
+      // Tự đăng nhập để lấy sessionToken rồi lưu phiên.
+      const { user, sessionToken } = await login(form.email, form.password);
+      setSession({ user, sessionToken });
+      nav({ to: user.role === "PROVIDER" ? "/provider" : "/receiver" });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Đăng ký thất bại");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -47,35 +84,30 @@ function Register() {
         </div>
       </div>
 
-      <form
-        className="space-y-3"
-        onSubmit={(e) => {
-          e.preventDefault();
-          nav({ to: role === "provider" ? "/provider" : "/receiver" });
-        }}
-      >
-        {[
-          { l: "Họ và tên", p: "Nguyễn Văn A", t: "text" },
-          { l: "Tổ chức", p: "Khách sạn / Nhà hàng / NGO...", t: "text" },
-          { l: "Email", p: "ban@example.com", t: "email" },
-          { l: "Số điện thoại", p: "+84 ...", t: "tel" },
-          { l: "Địa chỉ", p: "12 Lê Lợi, Quận 1, TP.HCM", t: "text" },
-        ].map((f) => (
-          <div key={f.l} className="space-y-1.5">
+      <form className="space-y-3" onSubmit={onSubmit}>
+        {fields.map((f) => (
+          <div key={f.k} className="space-y-1.5">
             <label className="text-sm font-semibold">{f.l}</label>
             <input
               type={f.t}
               placeholder={f.p}
+              required
+              minLength={f.k === "password" ? 6 : undefined}
+              value={form[f.k]}
+              onChange={(e) => setForm({ ...form, [f.k]: e.target.value })}
               className="w-full h-11 px-4 rounded-xl border border-input bg-card focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
             />
           </div>
         ))}
 
+        {error && <p className="text-sm text-destructive">{error}</p>}
+
         <button
           type="submit"
-          className="w-full h-11 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90"
+          disabled={loading}
+          className="w-full h-11 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 disabled:opacity-60"
         >
-          Tạo tài khoản
+          {loading ? "Đang tạo..." : "Tạo tài khoản"}
         </button>
       </form>
 
